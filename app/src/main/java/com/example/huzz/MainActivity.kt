@@ -59,17 +59,14 @@ class MainActivity : ComponentActivity() {
 fun MeshChatScreen() {
     val context = LocalContext.current
 
-    // Get the mesh manager from the foreground service (if running)
-    val meshManager = MeshForegroundService.meshManager
+    // Get the mesh manager flow from the foreground service
+    val meshManager by MeshForegroundService.meshManagerFlow.collectAsStateWithLifecycle()
 
-    val status = meshManager?.status?.collectAsStateWithLifecycle()
-    val messages = meshManager?.messages?.collectAsStateWithLifecycle()
-    val peerList = meshManager?.peerList?.collectAsStateWithLifecycle()
-    val activePeerCount = meshManager?.activePeerCount?.collectAsStateWithLifecycle()
+    val status by remember(meshManager) { meshManager?.status ?: kotlinx.coroutines.flow.MutableStateFlow(BleMeshManager.MeshStatus.Stopped) }.collectAsStateWithLifecycle()
+    val messageList by remember(meshManager) { meshManager?.messages ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<BleMeshManager.ChatMessage>()) }.collectAsStateWithLifecycle()
+    val peerCount by remember(meshManager) { meshManager?.activePeerCount ?: kotlinx.coroutines.flow.MutableStateFlow(0) }.collectAsStateWithLifecycle()
 
-    val isRunning = status?.value == BleMeshManager.MeshStatus.Running
-    val messageList = messages?.value ?: emptyList()
-    val peerCount = activePeerCount?.value ?: 0
+    val isRunning = status == BleMeshManager.MeshStatus.Running
 
     var username by remember { mutableStateOf("User") }
     var messageText by remember { mutableStateOf("") }
