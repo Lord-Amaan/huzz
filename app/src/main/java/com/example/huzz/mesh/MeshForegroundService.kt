@@ -27,9 +27,15 @@ class MeshForegroundService : Service() {
         const val ACTION_STOP = "com.example.huzz.mesh.STOP"
         const val EXTRA_NICKNAME = "nickname"
 
-        // Singleton reference to the mesh manager for the UI to access
-        var meshManager: BleMeshManager? = null
-            private set
+        // StateFlow reference to the mesh manager for the UI to access
+        private val _meshManagerFlow = kotlinx.coroutines.flow.MutableStateFlow<BleMeshManager?>(null)
+        val meshManagerFlow: kotlinx.coroutines.flow.StateFlow<BleMeshManager?> = _meshManagerFlow
+
+        var meshManager: BleMeshManager?
+            get() = _meshManagerFlow.value
+            private set(value) {
+                _meshManagerFlow.value = value
+            }
     }
 
     override fun onCreate() {
