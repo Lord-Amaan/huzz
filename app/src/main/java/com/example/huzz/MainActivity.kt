@@ -1,407 +1,870 @@
 package com.example.huzz
 
-import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
+import android.util.Log
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.huzz.mesh.BleMeshManager
-import com.example.huzz.mesh.MeshForegroundService
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.Lifecycle
+import com.example.huzz.mesh.BluetoothMeshService
+import com.example.huzz.mesh.MeshService
+import com.example.huzz.geohash.LocationChannelManager
+import com.example.huzz.onboarding.BluetoothCheckScreen
+import com.example.huzz.onboarding.BluetoothStatus
+import com.example.huzz.onboarding.BluetoothStatusManager
+import com.example.huzz.onboarding.BatteryOptimizationManager
+import com.example.huzz.onboarding.BatteryOptimizationPreferenceManager
+import com.example.huzz.onboarding.BatteryOptimizationScreen
+import com.example.huzz.onboarding.BatteryOptimizationStatus
+import com.example.huzz.onboarding.BackgroundLocationPermissionScreen
+import com.example.huzz.onboarding.InitializationErrorScreen
+import com.example.huzz.onboarding.InitializingScreen
+import com.example.huzz.onboarding.LocationCheckScreen
+import com.example.huzz.onboarding.LocationStatus
+import com.example.huzz.onboarding.LocationStatusManager
+import com.example.huzz.onboarding.OnboardingCoordinator
+import com.example.huzz.onboarding.OnboardingState
+import com.example.huzz.onboarding.PermissionExplanationScreen
+import com.example.huzz.onboarding.PermissionManager
+import com.example.huzz.ui.ChatScreen
+import com.example.huzz.ui.ChatViewModel
+import com.example.huzz.ui.OrientationAwareActivity
 import com.example.huzz.ui.theme.HuzzTheme
+import com.example.huzz.wifiaware.WifiAwareController
+import com.example.huzz.nostr.PoWPreferenceManager
+import com.example.huzz.services.VerificationService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : OrientationAwareActivity() {
+
+    private lateinit var permissionManager: PermissionManager
+    private lateinit var onboardingCoordinator: OnboardingCoordinator
+    private lateinit var bluetoothStatusManager: BluetoothStatusManager
+    private lateinit var locationStatusManager: LocationStatusManager
+    private lateinit var batteryOptimizationManager: BatteryOptimizationManager
+    
+    // Core mesh service - provided by the foreground service holder
+    private lateinit var meshService: BluetoothMeshService
+    private lateinit var unifiedMeshService: MeshService
+    private val mainViewModel: MainViewModel by viewModels()
+    private var pendingMeshForegroundServiceStart = false
+    private val chatViewModel: ChatViewModel by viewModels { 
+        object : ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return ChatViewModel(application, meshService, unifiedMeshService) as T
+            }
+        }
+    }
+    
+    private val forceFinishReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context, intent: android.content.Intent) {
+            if (intent.action == com.example.huzz.util.AppConstants.UI.ACTION_FORCE_FINISH) {
+                android.util.Log.i("MainActivity", "Received force finish broadcast, closing UI")
+                finishAffinity()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            this.setRecentsScreenshotEnabled(false)
+        }
+        // Register receiver for force finish signal from shutdown coordinator
+        val filter = android.content.IntentFilter(com.example.huzz.util.AppConstants.UI.ACTION_FORCE_FINISH)
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            registerReceiver(
+                forceFinishReceiver,
+                filter,
+                com.example.huzz.util.AppConstants.UI.PERMISSION_FORCE_FINISH,
+                null,
+                android.content.Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            registerReceiver(
+                forceFinishReceiver,
+                filter,
+                com.example.huzz.util.AppConstants.UI.PERMISSION_FORCE_FINISH,
+                null
+            )
+        }
+        
+        // Check if this is a quit request from the notification
+        if (intent.getBooleanExtra("ACTION_QUIT_APP", false)) {
+            android.util.Log.d("MainActivity", "Quit request received in onCreate, finishing activity")
+            finish()
+            return
+        }
+
+        com.example.huzz.service.AppShutdownCoordinator.cancelPendingShutdown()
+        
+        // Enable edge-to-edge display for modern Android look
         enableEdgeToEdge()
+
+        // Initialize permission management
+        permissionManager = PermissionManager(this)
+        // Start the foreground service when allowed, then get mesh instances from the holder.
+        startMeshForegroundServiceBestEffort()
+        meshService = com.example.huzz.service.MeshServiceHolder.getOrCreate(applicationContext)
+        unifiedMeshService = com.example.huzz.service.MeshServiceHolder.getUnifiedOrCreate(applicationContext)
+        // Expose BLE mesh to Wi‑Fi Aware controller for cross-transport relays - DEPRECATED
+        // Bridging is now handled by TransportBridgeService automatically
+        
+        bluetoothStatusManager = BluetoothStatusManager(
+            activity = this,
+            context = this,
+            onBluetoothEnabled = ::handleBluetoothEnabled,
+            onBluetoothDisabled = ::handleBluetoothDisabled
+        )
+        locationStatusManager = LocationStatusManager(
+            activity = this,
+            context = this,
+            onLocationEnabled = ::handleLocationEnabled,
+            onLocationDisabled = ::handleLocationDisabled
+        )
+        batteryOptimizationManager = BatteryOptimizationManager(
+            activity = this,
+            context = this,
+            onBatteryOptimizationDisabled = ::handleBatteryOptimizationDisabled,
+            onBatteryOptimizationFailed = ::handleBatteryOptimizationFailed
+        )
+        onboardingCoordinator = OnboardingCoordinator(
+            activity = this,
+            permissionManager = permissionManager,
+            onOnboardingComplete = ::handleOnboardingComplete,
+            onBackgroundLocationRequired = {
+                mainViewModel.updateOnboardingState(OnboardingState.BACKGROUND_LOCATION_EXPLANATION)
+            },
+            onOnboardingFailed = ::handleOnboardingFailed
+        )
+        
         setContent {
             HuzzTheme {
-                MeshChatScreen()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.background
+                ) { innerPadding ->
+                    OnboardingFlowScreen(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                    )
+                }
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // Don't stop the service here — it runs in the background
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MeshChatScreen() {
-    val context = LocalContext.current
-
-    // Get the mesh manager flow from the foreground service
-    val meshManager by MeshForegroundService.meshManagerFlow.collectAsStateWithLifecycle()
-
-    val status by remember(meshManager) { meshManager?.status ?: kotlinx.coroutines.flow.MutableStateFlow(BleMeshManager.MeshStatus.Stopped) }.collectAsStateWithLifecycle()
-    val messageList by remember(meshManager) { meshManager?.messages ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<BleMeshManager.ChatMessage>()) }.collectAsStateWithLifecycle()
-    val peerCount by remember(meshManager) { meshManager?.activePeerCount ?: kotlinx.coroutines.flow.MutableStateFlow(0) }.collectAsStateWithLifecycle()
-
-    val isRunning = status == BleMeshManager.MeshStatus.Running
-
-    var username by remember { mutableStateOf("User") }
-    var messageText by remember { mutableStateOf("") }
-    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
-
-    val permissionsToRequest = buildList {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            add(Manifest.permission.BLUETOOTH_SCAN)
-            add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            add(Manifest.permission.BLUETOOTH_CONNECT)
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.NEARBY_WIFI_DEVICES)
-            add(Manifest.permission.POST_NOTIFICATIONS)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            add(Manifest.permission.BLUETOOTH_SCAN)
-            add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            add(Manifest.permission.BLUETOOTH_CONNECT)
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            add(Manifest.permission.BLUETOOTH)
-            add(Manifest.permission.BLUETOOTH_ADMIN)
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
+        
+        // Collect state changes in a lifecycle-aware manner
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.onboardingState.collect { state ->
+                    handleOnboardingStateChange(state)
+                }
+            }
         }
-    }.toTypedArray()
 
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.entries.all { it.value }
-        if (allGranted) {
-            pendingAction?.invoke()
-            pendingAction = null
-        } else {
-            Toast.makeText(context, "Permissions required for mesh network", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun executeWithPermissions(action: () -> Unit) {
-        val allGranted = permissionsToRequest.all {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, it) ==
-                    android.content.pm.PackageManager.PERMISSION_GRANTED
-        }
-        if (allGranted) {
-            action()
-        } else {
-            pendingAction = action
-            launcher.launch(permissionsToRequest)
-        }
-    }
-
-    val listState = rememberLazyListState()
-
-    // Auto-scroll to bottom when new messages arrive
-    LaunchedEffect(messageList.size) {
-        if (messageList.isNotEmpty()) {
-            listState.animateScrollToItem(messageList.size - 1)
-        }
-    }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            "Huzz Mesh",
-                            fontWeight = FontWeight.Bold
-                        )
-                        if (isRunning) {
-                            Text(
-                                "$peerCount peer${if (peerCount != 1) "s" else ""} connected",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF4CAF50)
-                            )
-                        }
+        // Keep the unified mesh delegate attached when Wi-Fi Aware starts after the UI.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                WifiAwareController.running.collect { running ->
+                    if (running && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                        unifiedMeshService.delegate = chatViewModel
                     }
-                },
-                actions = {
-                    if (isRunning) {
-                        // Status indicator
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF4CAF50))
-                        )
+                }
+            }
+        }
+        
+        // Only start onboarding process if we're in the initial CHECKING state
+        // This prevents restarting onboarding on configuration changes
+        if (mainViewModel.onboardingState.value == OnboardingState.CHECKING) {
+            checkOnboardingStatus()
+        }
+    }
+    
+    @Composable
+    private fun OnboardingFlowScreen(modifier: Modifier = Modifier) {
+        val context = LocalContext.current
+        val onboardingState by mainViewModel.onboardingState.collectAsState()
+        val bluetoothStatus by mainViewModel.bluetoothStatus.collectAsState()
+        val locationStatus by mainViewModel.locationStatus.collectAsState()
+        val batteryOptimizationStatus by mainViewModel.batteryOptimizationStatus.collectAsState()
+        val errorMessage by mainViewModel.errorMessage.collectAsState()
+        val isBluetoothLoading by mainViewModel.isBluetoothLoading.collectAsState()
+        val isLocationLoading by mainViewModel.isLocationLoading.collectAsState()
+        val isBatteryOptimizationLoading by mainViewModel.isBatteryOptimizationLoading.collectAsState()
 
-                        // Stop button
-                        IconButton(onClick = {
-                            val stopIntent = Intent(context, MeshForegroundService::class.java).apply {
-                                action = MeshForegroundService.ACTION_STOP
-                            }
-                            context.startService(stopIntent)
-                        }) {
-                            Icon(Icons.Default.Close, contentDescription = "Stop Mesh")
-                        }
+        DisposableEffect(context, bluetoothStatusManager) {
+
+            val receiver = bluetoothStatusManager.monitorBluetoothState(
+                context = context,
+                bluetoothStatusManager = bluetoothStatusManager,
+                onBluetoothStateChanged = { status ->
+                    if (status == BluetoothStatus.ENABLED && onboardingState == OnboardingState.BLUETOOTH_CHECK) {
+                        checkBluetoothAndProceed()
                     }
                 }
             )
-        },
-        bottomBar = {
-            if (isRunning) {
-                MeshMessageInput(
-                    messageText = messageText,
-                    onMessageChange = { messageText = it },
-                    onSend = {
-                        meshManager?.sendMessage(messageText)
-                        messageText = ""
+
+            onDispose {
+                try {
+                    context.unregisterReceiver(receiver)
+                } catch (e: IllegalStateException) {
+                    Log.w("BluetoothStatusUI", "Receiver was not registered")
+                }
+            }
+        }
+
+        when (onboardingState) {
+            OnboardingState.PERMISSION_REQUESTING -> {
+                InitializingScreen(modifier)
+            }
+            
+            OnboardingState.BLUETOOTH_CHECK -> {
+                BluetoothCheckScreen(
+                    modifier = modifier,
+                    status = bluetoothStatus,
+                    onEnableBluetooth = {
+                        mainViewModel.updateBluetoothLoading(true)
+                        bluetoothStatusManager.requestEnableBluetooth()
+                    },
+                    onRetry = {
+                        checkBluetoothAndProceed()
+                    },
+                    onSkip = {
+                        mainViewModel.skipBluetoothCheck()
+                        checkLocationAndProceed()
+                    },
+                    isLoading = isBluetoothLoading
+                )
+            }
+            
+            OnboardingState.LOCATION_CHECK -> {
+                LocationCheckScreen(
+                    modifier = modifier,
+                    status = locationStatus,
+                    onEnableLocation = {
+                        mainViewModel.updateLocationLoading(true)
+                        locationStatusManager.requestEnableLocation()
+                    },
+                    onRetry = {
+                        checkLocationAndProceed()
+                    },
+                    isLoading = isLocationLoading
+                )
+            }
+            
+            OnboardingState.BATTERY_OPTIMIZATION_CHECK -> {
+                BatteryOptimizationScreen(
+                    modifier = modifier,
+                    status = batteryOptimizationStatus,
+                    onDisableBatteryOptimization = {
+                        mainViewModel.updateBatteryOptimizationLoading(true)
+                        batteryOptimizationManager.requestDisableBatteryOptimization()
+                    },
+                    onRetry = {
+                        checkBatteryOptimizationAndProceed()
+                    },
+                    onSkip = {
+                        // Skip battery optimization and proceed
+                        proceedWithPermissionCheck()
+                    },
+                    isLoading = isBatteryOptimizationLoading
+                )
+            }
+            
+            OnboardingState.PERMISSION_EXPLANATION -> {
+                PermissionExplanationScreen(
+                    modifier = modifier,
+                    permissionCategories = permissionManager.getCategorizedPermissions(),
+                    onContinue = {
+                        mainViewModel.updateOnboardingState(OnboardingState.PERMISSION_REQUESTING)
+                        onboardingCoordinator.requestPermissions()
+                    }
+                )
+            }
+
+            OnboardingState.BACKGROUND_LOCATION_EXPLANATION -> {
+                BackgroundLocationPermissionScreen(
+                    modifier = modifier,
+                    onContinue = {
+                        onboardingCoordinator.requestBackgroundLocation()
+                    },
+                    onRetry = {
+                        onboardingCoordinator.checkBackgroundLocationAndProceed()
+                    },
+                    onSkip = {
+                        onboardingCoordinator.skipBackgroundLocation()
+                    }
+                )
+            }
+
+            OnboardingState.CHECKING, OnboardingState.INITIALIZING -> {
+                InitializingScreen(modifier)
+            }
+
+            OnboardingState.COMPLETE -> {
+                androidx.activity.compose.BackHandler(enabled = true) {
+                    val handled = chatViewModel.handleBackPressed()
+                    if (!handled) {
+                        finish()
+                    }
+                }
+                ChatScreen(viewModel = chatViewModel)
+            }
+            
+            OnboardingState.ERROR -> {
+                InitializationErrorScreen(
+                    modifier = modifier,
+                    errorMessage = errorMessage,
+                    onRetry = {
+                        mainViewModel.updateOnboardingState(OnboardingState.CHECKING)
+                        checkOnboardingStatus()
+                    },
+                    onOpenSettings = {
+                        onboardingCoordinator.openAppSettings()
                     }
                 )
             }
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            if (!isRunning) {
-                // --- Start Screen ---
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+    }
+    
+    private fun handleOnboardingStateChange(state: OnboardingState) {
+
+        when (state) {
+            OnboardingState.COMPLETE -> {
+                // App is fully initialized, mesh service is running
+                android.util.Log.i("MainActivity", "Onboarding completed - app ready")
+            }
+            OnboardingState.ERROR -> {
+                android.util.Log.e("MainActivity", "Onboarding error state reached")
+            }
+            else -> {}
+        }
+    }
+    
+    private fun checkOnboardingStatus() {
+        lifecycleScope.launch {
+            // Small delay to show the checking state
+            delay(500)
+            
+            // First check Bluetooth status (always required)
+            checkBluetoothAndProceed()
+        }
+    }
+    
+    /**
+     * Check Bluetooth status and proceed with onboarding flow
+     */
+    private fun checkBluetoothAndProceed() {
+        // Check if user has skipped Bluetooth check for this session
+        if (mainViewModel.isBluetoothCheckSkipped.value) {
+            checkLocationAndProceed()
+            return
+        }
+
+        // For first-time users, skip Bluetooth check and go straight to permissions
+        // We'll check Bluetooth after permissions are granted
+        if (permissionManager.isFirstTimeLaunch()) {
+            proceedWithPermissionCheck()
+            return
+        }
+        
+        // For existing users, check Bluetooth status first
+        bluetoothStatusManager.logBluetoothStatus()
+        mainViewModel.updateBluetoothStatus(bluetoothStatusManager.checkBluetoothStatus())
+        
+        val bleRequired = try { com.example.huzz.ui.debug.DebugPreferenceManager.getBleEnabled(true) } catch (_: Exception) { true }
+        if (!bleRequired) {
+            // Skip BLE checks entirely when BLE is disabled in debug settings
+            checkLocationAndProceed()
+            return
+        }
+        when (mainViewModel.bluetoothStatus.value) {
+            BluetoothStatus.ENABLED -> {
+                // Bluetooth is enabled, check location services next
+                checkLocationAndProceed()
+            }
+            BluetoothStatus.DISABLED -> {
+                // Show Bluetooth enable screen (should have permissions as existing user)
+                mainViewModel.updateOnboardingState(OnboardingState.BLUETOOTH_CHECK)
+                mainViewModel.updateBluetoothLoading(false)
+            }
+            BluetoothStatus.NOT_SUPPORTED -> {
+                // Device doesn't support Bluetooth
+                android.util.Log.e("MainActivity", "Bluetooth not supported")
+                mainViewModel.updateOnboardingState(OnboardingState.BLUETOOTH_CHECK)
+                mainViewModel.updateBluetoothLoading(false)
+            }
+        }
+    }
+    
+    /**
+     * Proceed with permission checking 
+     */
+    private fun proceedWithPermissionCheck() {
+        lifecycleScope.launch {
+            delay(200) // Small delay for smooth transition
+
+            if (permissionManager.isFirstTimeLaunch()) {
+                mainViewModel.updateOnboardingState(OnboardingState.PERMISSION_EXPLANATION)
+            } else if (permissionManager.getUnrequestedOptionalPermissions().isNotEmpty()) {
+                mainViewModel.updateOnboardingState(OnboardingState.PERMISSION_EXPLANATION)
+            } else if (permissionManager.areRequiredPermissionsGranted()) {
+                if (permissionManager.needsBackgroundLocationPermission() &&
+                    !permissionManager.isBackgroundLocationGranted() &&
+                    !com.example.huzz.onboarding.BackgroundLocationPreferenceManager.isSkipped(this@MainActivity)
                 ) {
-                    Text(
-                        "📡",
-                        fontSize = 64.sp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "Huzz Mesh Chat",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Offline peer-to-peer chat via BLE mesh.\nNo internet, no servers, no limits.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    OutlinedTextField(
-                        value = username,
-                        onValueChange = { if (it.length <= 15) username = it },
-                        label = { Text("Your Nickname") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(0.8f)
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            executeWithPermissions {
-                                val startIntent = Intent(context, MeshForegroundService::class.java).apply {
-                                    action = MeshForegroundService.ACTION_START
-                                    putExtra(MeshForegroundService.EXTRA_NICKNAME, username)
-                                }
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    context.startForegroundService(startIntent)
-                                } else {
-                                    context.startService(startIntent)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Join Mesh Network", fontSize = 16.sp)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        "Your device will advertise and scan\nfor nearby Huzz users via Bluetooth.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
+                    mainViewModel.updateOnboardingState(OnboardingState.BACKGROUND_LOCATION_EXPLANATION)
+                } else {
+                    mainViewModel.updateOnboardingState(OnboardingState.INITIALIZING)
+                    initializeApp()
                 }
             } else {
-                // --- Chat Screen ---
-                if (messageList.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("📡", fontSize = 48.sp)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                "Mesh is active. Waiting for peers...",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                "Messages from nearby devices will appear here.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                mainViewModel.updateOnboardingState(OnboardingState.PERMISSION_EXPLANATION)
+            }
+        }
+    }
+    
+    /**
+     * Handle Bluetooth enabled callback
+     */
+    private fun handleBluetoothEnabled() {
+        mainViewModel.updateBluetoothLoading(false)
+        mainViewModel.updateBluetoothStatus(BluetoothStatus.ENABLED)
+        checkLocationAndProceed()
+    }
+
+    /**
+     * Check Location services status and proceed with onboarding flow
+     */
+    private fun checkLocationAndProceed() {
+        // For first-time users, skip location check and go straight to permissions
+        // We'll check location after permissions are granted
+        if (permissionManager.isFirstTimeLaunch()) {
+            proceedWithPermissionCheck()
+            return
+        }
+        
+        // For existing users, check location status
+        locationStatusManager.logLocationStatus()
+        mainViewModel.updateLocationStatus(locationStatusManager.checkLocationStatus())
+        
+        when (mainViewModel.locationStatus.value) {
+            LocationStatus.ENABLED -> {
+                // Location services enabled, check battery optimization next
+                checkBatteryOptimizationAndProceed()
+            }
+            LocationStatus.DISABLED -> {
+                // Show location enable screen (should have permissions as existing user)
+                mainViewModel.updateOnboardingState(OnboardingState.LOCATION_CHECK)
+                mainViewModel.updateLocationLoading(false)
+            }
+            LocationStatus.NOT_AVAILABLE -> {
+                // Device doesn't support location services (very unusual)
+                Log.e("MainActivity", "Location services not available")
+                mainViewModel.updateOnboardingState(OnboardingState.LOCATION_CHECK)
+                mainViewModel.updateLocationLoading(false)
+            }
+        }
+    }
+
+    /**
+     * Handle Location enabled callback
+     */
+    private fun handleLocationEnabled() {
+        mainViewModel.updateLocationLoading(false)
+        mainViewModel.updateLocationStatus(LocationStatus.ENABLED)
+        // Ensure Wi-Fi Aware starts now that location is enabled
+        com.example.huzz.wifiaware.WifiAwareController.startIfPossible()
+        checkBatteryOptimizationAndProceed()
+    }
+
+    /**
+     * Handle Location disabled callback
+     */
+    private fun handleLocationDisabled(message: String) {
+        Log.w("MainActivity", "Location services disabled or failed: $message")
+        mainViewModel.updateLocationLoading(false)
+        mainViewModel.updateLocationStatus(locationStatusManager.checkLocationStatus())
+
+        when {
+            mainViewModel.locationStatus.value == LocationStatus.NOT_AVAILABLE -> {
+                // Show permanent error for devices without location services
+                mainViewModel.updateErrorMessage(message)
+                mainViewModel.updateOnboardingState(OnboardingState.ERROR)
+            }
+            else -> {
+                // Stay on location check screen for retry
+                mainViewModel.updateOnboardingState(OnboardingState.LOCATION_CHECK)
+            }
+        }
+    }
+    
+    /**
+     * Handle Bluetooth disabled callback
+     */
+    private fun handleBluetoothDisabled(message: String) {
+        Log.w("MainActivity", "Bluetooth disabled or failed: $message")
+        mainViewModel.updateBluetoothLoading(false)
+        mainViewModel.updateBluetoothStatus(bluetoothStatusManager.checkBluetoothStatus())
+        
+        when {
+            mainViewModel.bluetoothStatus.value == BluetoothStatus.NOT_SUPPORTED -> {
+                // Show permanent error for unsupported devices
+                mainViewModel.updateErrorMessage(message)
+                mainViewModel.updateOnboardingState(OnboardingState.ERROR)
+            }
+            message.contains("Permission") && permissionManager.isFirstTimeLaunch() -> {
+                // During first-time onboarding, if Bluetooth enable fails due to permissions,
+                // proceed to permission explanation screen where user will grant permissions first
+                proceedWithPermissionCheck()
+            }
+            message.contains("Permission") -> {
+                // For existing users, redirect to permission explanation to grant missing permissions
+                mainViewModel.updateOnboardingState(OnboardingState.PERMISSION_EXPLANATION)
+            }
+            else -> {
+                // Stay on Bluetooth check screen for retry
+                mainViewModel.updateOnboardingState(OnboardingState.BLUETOOTH_CHECK)
+            }
+        }
+    }
+    
+    private fun handleOnboardingComplete() {
+        // After permissions are granted, re-check Bluetooth, Location, and Battery Optimization status
+        val currentBluetoothStatus = bluetoothStatusManager.checkBluetoothStatus()
+        val currentLocationStatus = locationStatusManager.checkLocationStatus()
+        val currentBatteryOptimizationStatus = when {
+            !batteryOptimizationManager.isBatteryOptimizationSupported() -> BatteryOptimizationStatus.NOT_SUPPORTED
+            batteryOptimizationManager.isBatteryOptimizationDisabled() -> BatteryOptimizationStatus.DISABLED
+            else -> BatteryOptimizationStatus.ENABLED
+        }
+        
+        val bleRequired2 = try { com.example.huzz.ui.debug.DebugPreferenceManager.getBleEnabled(true) } catch (_: Exception) { true }
+        when {
+            bleRequired2 && currentBluetoothStatus != BluetoothStatus.ENABLED -> {
+                // Bluetooth still disabled, but now we have permissions to enable it
+                mainViewModel.updateBluetoothStatus(currentBluetoothStatus)
+                mainViewModel.updateOnboardingState(OnboardingState.BLUETOOTH_CHECK)
+                mainViewModel.updateBluetoothLoading(false)
+            }
+            currentLocationStatus != LocationStatus.ENABLED -> {
+                // Location services still disabled, but now we have permissions to enable it
+                mainViewModel.updateLocationStatus(currentLocationStatus)
+                mainViewModel.updateOnboardingState(OnboardingState.LOCATION_CHECK)
+                mainViewModel.updateLocationLoading(false)
+            }
+            currentBatteryOptimizationStatus == BatteryOptimizationStatus.ENABLED -> {
+                // Battery optimization still enabled, show battery optimization screen
+                mainViewModel.updateBatteryOptimizationStatus(currentBatteryOptimizationStatus)
+                mainViewModel.updateOnboardingState(OnboardingState.BATTERY_OPTIMIZATION_CHECK)
+                mainViewModel.updateBatteryOptimizationLoading(false)
+            }
+            else -> {
+                // Both are enabled, proceed to app initialization
+                mainViewModel.updateOnboardingState(OnboardingState.INITIALIZING)
+                initializeApp()
+            }
+        }
+    }
+    
+    private fun handleOnboardingFailed(message: String) {
+        Log.e("MainActivity", "Onboarding failed: $message")
+        mainViewModel.updateErrorMessage(message)
+        mainViewModel.updateOnboardingState(OnboardingState.ERROR)
+    }
+
+    private fun startMeshForegroundServiceBestEffort() {
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            pendingMeshForegroundServiceStart = true
+            Log.i("MainActivity", "Deferring foreground mesh service start until activity is started")
+            return
+        }
+
+        try {
+            com.example.huzz.service.MeshForegroundService.start(applicationContext)
+            pendingMeshForegroundServiceStart = false
+        } catch (e: Exception) {
+            pendingMeshForegroundServiceStart = true
+            Log.w("MainActivity", "Unable to start foreground mesh service; will retry when activity is started", e)
+        }
+    }
+    
+    /**
+     * Check Battery Optimization status and proceed with onboarding flow
+     */
+    private fun checkBatteryOptimizationAndProceed() {
+        // For first-time users, skip battery optimization check and go straight to permissions
+        // We'll check battery optimization after permissions are granted
+        if (permissionManager.isFirstTimeLaunch()) {
+            proceedWithPermissionCheck()
+            return
+        }
+
+        // Check if user has previously skipped battery optimization
+        if (BatteryOptimizationPreferenceManager.isSkipped(this)) {
+            proceedWithPermissionCheck()
+            return
+        }
+        
+        // For existing users, check battery optimization status
+        batteryOptimizationManager.logBatteryOptimizationStatus()
+        val currentBatteryOptimizationStatus = when {
+            !batteryOptimizationManager.isBatteryOptimizationSupported() -> BatteryOptimizationStatus.NOT_SUPPORTED
+            batteryOptimizationManager.isBatteryOptimizationDisabled() -> BatteryOptimizationStatus.DISABLED
+            else -> BatteryOptimizationStatus.ENABLED
+        }
+        mainViewModel.updateBatteryOptimizationStatus(currentBatteryOptimizationStatus)
+        
+        when (currentBatteryOptimizationStatus) {
+            BatteryOptimizationStatus.DISABLED, BatteryOptimizationStatus.NOT_SUPPORTED -> {
+                // Battery optimization is disabled or not supported, proceed with permission check
+                proceedWithPermissionCheck()
+            }
+            BatteryOptimizationStatus.ENABLED -> {
+                // Show battery optimization disable screen
+                mainViewModel.updateOnboardingState(OnboardingState.BATTERY_OPTIMIZATION_CHECK)
+                mainViewModel.updateBatteryOptimizationLoading(false)
+            }
+        }
+    }
+    
+    /**
+     * Handle Battery Optimization disabled callback
+     */
+    private fun handleBatteryOptimizationDisabled() {
+        mainViewModel.updateBatteryOptimizationLoading(false)
+        mainViewModel.updateBatteryOptimizationStatus(BatteryOptimizationStatus.DISABLED)
+        proceedWithPermissionCheck()
+    }
+    
+    /**
+     * Handle Battery Optimization failed callback
+     */
+    private fun handleBatteryOptimizationFailed(message: String) {
+        android.util.Log.w("MainActivity", "Battery optimization disable failed: $message")
+        mainViewModel.updateBatteryOptimizationLoading(false)
+        val currentStatus = when {
+            !batteryOptimizationManager.isBatteryOptimizationSupported() -> BatteryOptimizationStatus.NOT_SUPPORTED
+            batteryOptimizationManager.isBatteryOptimizationDisabled() -> BatteryOptimizationStatus.DISABLED
+            else -> BatteryOptimizationStatus.ENABLED
+        }
+        mainViewModel.updateBatteryOptimizationStatus(currentStatus)
+        
+        // Stay on battery optimization check screen for retry
+        mainViewModel.updateOnboardingState(OnboardingState.BATTERY_OPTIMIZATION_CHECK)
+    }
+    
+    private fun initializeApp() {
+        lifecycleScope.launch {
+            try {
+                // Initialize the app with a proper delay to ensure Bluetooth stack is ready
+                // This solves the issue where app needs restart to work on first install
+                delay(1000) // Give the system time to process permission grants
+
+                // Initialize PoW preferences early in the initialization process
+                PoWPreferenceManager.init(this@MainActivity)
+                
+                // Initialize Location Notes Manager (extracted to separate file)
+                com.example.huzz.nostr.LocationNotesInitializer.initialize(this@MainActivity)
+                
+                // Ensure all permissions are still granted (user might have revoked in settings)
+                if (!permissionManager.areAllPermissionsGranted()) {
+                    val missing = permissionManager.getMissingPermissions()
+                    Log.w("MainActivity", "Permissions revoked during initialization: $missing")
+                    handleOnboardingFailed("Some permissions were revoked. Please grant all permissions to continue.")
+                    return@launch
+                }
+
+                // Set up unified mesh delegate and start enabled transports
+                unifiedMeshService.delegate = chatViewModel
+                unifiedMeshService.startServices()
+                startMeshForegroundServiceBestEffort()
+
+                // Handle any notification intent
+                handleNotificationIntent(intent)
+                handleVerificationIntent(intent)
+
+                // Small delay to ensure mesh service is fully initialized
+                delay(500)
+                Log.i("MainActivity", "App initialization complete")
+                mainViewModel.updateOnboardingState(OnboardingState.COMPLETE)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to initialize app", e)
+                handleOnboardingFailed("Failed to initialize the app: ${e.message}")
+            }
+        }
+    }
+    
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        
+        // Check if this is a quit request from the notification
+        if (intent.getBooleanExtra("ACTION_QUIT_APP", false)) {
+            android.util.Log.d("MainActivity", "Quit request received, finishing activity")
+            finish()
+            return
+        }
+
+        com.example.huzz.service.AppShutdownCoordinator.cancelPendingShutdown()
+        
+        // Handle notification intents when app is already running
+        if (mainViewModel.onboardingState.value == OnboardingState.COMPLETE) {
+            handleNotificationIntent(intent)
+            handleVerificationIntent(intent)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (pendingMeshForegroundServiceStart) {
+            startMeshForegroundServiceBestEffort()
+        }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Revoke stale live-location work before any resumed UI can use cached channels.
+        LocationChannelManager.getInstance(applicationContext).syncPermissionState()
+
+        // Check Bluetooth and Location status on resume and handle accordingly
+        if (mainViewModel.onboardingState.value == OnboardingState.COMPLETE) {
+            // Reattach mesh delegate to new ChatViewModel instance after Activity recreation
+            try { unifiedMeshService.delegate = chatViewModel } catch (_: Exception) { }
+
+            // Check if Bluetooth was disabled while app was backgrounded
+            val currentBluetoothStatus = bluetoothStatusManager.checkBluetoothStatus()
+            val bleRequired = try { com.example.huzz.ui.debug.DebugPreferenceManager.getBleEnabled(true) } catch (_: Exception) { true }
+            if (bleRequired && currentBluetoothStatus != BluetoothStatus.ENABLED && !mainViewModel.isBluetoothCheckSkipped.value) {
+                Log.w("MainActivity", "Bluetooth disabled while app was backgrounded")
+                mainViewModel.updateBluetoothStatus(currentBluetoothStatus)
+                mainViewModel.updateOnboardingState(OnboardingState.BLUETOOTH_CHECK)
+                mainViewModel.updateBluetoothLoading(false)
+                return
+            }
+            
+            // Check if location services were disabled while app was backgrounded
+            val currentLocationStatus = locationStatusManager.checkLocationStatus()
+            if (currentLocationStatus != LocationStatus.ENABLED) {
+                Log.w("MainActivity", "Location services disabled while app was backgrounded")
+                mainViewModel.updateLocationStatus(currentLocationStatus)
+                mainViewModel.updateOnboardingState(OnboardingState.LOCATION_CHECK)
+                mainViewModel.updateLocationLoading(false)
+            } else {
+                // If location is enabled, ensure Wi-Fi Aware starts if it was blocked by location earlier
+                com.example.huzz.wifiaware.WifiAwareController.startIfPossible()
+            }
+        }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Only set background state if app is fully initialized
+        if (mainViewModel.onboardingState.value == OnboardingState.COMPLETE) {
+            // Detach UI delegate so the foreground service can own DM notifications while UI is closed
+            try { unifiedMeshService.delegate = null } catch (_: Exception) { }
+        }
+    }
+    
+    /**
+     * Handle intents from notification clicks - open specific private chat or geohash chat
+     */
+    private fun handleNotificationIntent(intent: Intent) {
+        val shouldOpenPrivateChat = intent.getBooleanExtra(
+            com.example.huzz.ui.NotificationManager.EXTRA_OPEN_PRIVATE_CHAT, 
+            false
+        )
+        
+        val shouldOpenGeohashChat = intent.getBooleanExtra(
+            com.example.huzz.ui.NotificationManager.EXTRA_OPEN_GEOHASH_CHAT,
+            false
+        )
+        
+        when {
+            shouldOpenPrivateChat -> {
+                val peerID = intent.getStringExtra(com.example.huzz.ui.NotificationManager.EXTRA_PEER_ID)
+                val senderNickname = intent.getStringExtra(com.example.huzz.ui.NotificationManager.EXTRA_SENDER_NICKNAME)
+                
+                if (peerID != null) {
+                    Log.d("MainActivity", "Opening private chat with $senderNickname (peerID: $peerID) from notification")
+                    
+                    // Open the private chat sheet with this peer
+                    chatViewModel.showMeshPeerList()
+                    chatViewModel.showPrivateChatSheet(peerID)
+                    
+                    // Clear notifications for this sender since user is now viewing the chat
+                    chatViewModel.clearNotificationsForSender(peerID)
+                }
+            }
+            
+            shouldOpenGeohashChat -> {
+                val geohash = intent.getStringExtra(com.example.huzz.ui.NotificationManager.EXTRA_GEOHASH)
+                
+                if (geohash != null) {
+                    Log.d("MainActivity", "Opening geohash chat from notification")
+                    
+                    // Switch to the geohash channel - create appropriate geohash channel level
+                    val level = when (geohash.length) {
+                        7 -> com.example.huzz.geohash.GeohashChannelLevel.BLOCK
+                        6 -> com.example.huzz.geohash.GeohashChannelLevel.NEIGHBORHOOD
+                        5 -> com.example.huzz.geohash.GeohashChannelLevel.CITY
+                        4 -> com.example.huzz.geohash.GeohashChannelLevel.PROVINCE
+                        2 -> com.example.huzz.geohash.GeohashChannelLevel.REGION
+                        else -> com.example.huzz.geohash.GeohashChannelLevel.CITY // Default fallback
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(horizontal = 12.dp),
-                        state = listState
-                    ) {
-                        items(messageList) { message ->
-                            MeshMessageBubble(message)
-                        }
-                    }
+                    val geohashChannel = com.example.huzz.geohash.GeohashChannel(level, geohash)
+                    val channelId = com.example.huzz.geohash.ChannelID.Location(geohashChannel)
+                    chatViewModel.selectLocationChannel(channelId)
+                    
+                    // Update current geohash state for notifications
+                    chatViewModel.setCurrentGeohash(geohash)
+                    
+                    // Clear notifications for this geohash since user is now viewing it
+                    chatViewModel.clearNotificationsForGeohash(geohash)
                 }
             }
         }
     }
-}
 
-@Composable
-fun MeshMessageBubble(message: BleMeshManager.ChatMessage) {
-    val isSystem = message.senderPeerID.isEmpty()
+    private fun handleVerificationIntent(intent: Intent) {
+        val uri = intent.data ?: return
+        if (uri.scheme != "huzz" || uri.host != "verify") return
 
-    if (isSystem) {
-        // System message (join/leave)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = message.content,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 3.dp),
-            horizontalAlignment = if (message.isFromMe) Alignment.End else Alignment.Start
-        ) {
-            Surface(
-                color = if (message.isFromMe)
-                    MaterialTheme.colorScheme.primaryContainer
-                else
-                    MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomStart = if (message.isFromMe) 16.dp else 4.dp,
-                    bottomEnd = if (message.isFromMe) 4.dp else 16.dp
-                ),
-                modifier = Modifier.widthIn(max = 300.dp)
-            ) {
-                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                    if (!message.isFromMe) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = message.sender,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            if (message.isRelayed) {
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "🔄",
-                                    fontSize = 10.sp
-                                )
-                            }
-                        }
-                    }
-                    Text(
-                        text = message.content,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
+        chatViewModel.showVerificationSheet()
+        val qr = VerificationService.verifyScannedQR(uri.toString())
+        if (qr != null) {
+            chatViewModel.beginQRVerification(qr)
         }
     }
-}
 
-@Composable
-fun MeshMessageInput(
-    messageText: String,
-    onMessageChange: (String) -> Unit,
-    onSend: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 4.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .navigationBarsPadding()
-                .imePadding(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = messageText,
-                onValueChange = onMessageChange,
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Type a message") },
-                shape = RoundedCornerShape(24.dp),
-                singleLine = false,
-                maxLines = 4
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FilledIconButton(
-                onClick = onSend,
-                enabled = messageText.isNotBlank()
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Send"
-                )
-            }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        
+        try { unregisterReceiver(forceFinishReceiver) } catch (_: Exception) { }
+        
+        // Cleanup location status manager
+        try {
+            locationStatusManager.cleanup()
+        } catch (e: Exception) {
+            Log.w("MainActivity", "Error cleaning up location status manager: ${e.message}")
         }
+        
+        // Do not stop mesh here; ForegroundService owns lifecycle for background reliability
     }
 }

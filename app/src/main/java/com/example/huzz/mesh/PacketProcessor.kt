@@ -1,109 +1,313 @@
 package com.example.huzz.mesh
 
 import android.util.Log
-import java.util.concurrent.ConcurrentHashMap
+import com.example.huzz.protocol.HuzzPacket
+import com.example.huzz.protocol.MessageType
+import com.example.huzz.model.RoutedPacket
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.actor
 
 /**
- * Handles packet deduplication, TTL enforcement, and relay decisions.
- * Uses a seen-message cache to prevent infinite loops in the mesh.
- *
- * Adapted from BitChat's PacketProcessor and SecurityManager.
+ * Processes incoming packets and routes them to appropriate handlers
+ * 
+ * Per-peer packet serialization using Kotlin coroutine actors
+ * Prevents race condition where multiple threads process packets
+ * from the same peer simultaneously, causing session management conflicts.
  */
 class PacketProcessor(private val myPeerID: String) {
-
+    private val debugManager by lazy { try { com.example.huzz.ui.debug.DebugSettingsManager.getInstance() } catch (e: Exception) { null } }
+    
     companion object {
         private const val TAG = "PacketProcessor"
     }
-
+    
+    // Delegate for callbacks
+    var delegate: PacketProcessorDelegate? = null
+    
+    // Helper function to format peer ID with nickname for logging
+    private fun formatPeerForLog(peerID: String): String {
+        val nickname = delegate?.getPeerNickname(peerID)
+        return if (nickname != null) "$peerID ($nickname)" else peerID
+    }
+    
+    // Packet relay manager for centralized relay decisions
+    private val packetRelayManager = PacketRelayManager(myPeerID)
+    
+    // Coroutines
+    private val processorScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
+    // Per-peer actors to serialize packet processing
+    // Each peer gets its own actor that processes packets sequentially
+    // This prevents race conditions in session management
+    private val peerActors = mutableMapOf<String, CompletableDeferred<Unit>>()
+    
+    @OptIn(ObsoleteCoroutinesApi::class)
+    private fun getOrCreateActorForPeer(peerID: String) = processorScope.actor<RoutedPacket>(
+        capacity = Channel.UNLIMITED
+    ) {
+        for (packet in channel) {
+            handleReceivedPacket(packet)
+        }
+    }
+    
+    // Cache actors to reuse them
+    private val actors = mutableMapOf<String, kotlinx.coroutines.channels.SendChannel<RoutedPacket>>()
+    
+    init {
+        // Set up the packet relay manager delegate immediately
+        setupRelayManager()
+    }
+    
     /**
-     * Cache of recently seen packet IDs with their arrival timestamp.
-     * Used to prevent reprocessing/relaying the same packet.
+     * Process received packet - main entry point for all incoming packets
+     * SURGICAL FIX: Route to per-peer actor for serialized processing
      */
-    private val seenPackets = ConcurrentHashMap<String, Long>()
+    fun processPacket(routed: RoutedPacket) {
+        val peerID = routed.peerID
 
+        if (peerID == null) {
+            Log.w(TAG, "Received packet with no peer ID, skipping")
+            return
+        }
+        
+        // Get or create actor for this peer
+        val actor = actors.getOrPut(peerID) { getOrCreateActorForPeer(peerID) }
+        
+        // Send packet to peer's dedicated actor for serialized processing
+        processorScope.launch {
+            try {
+                actor.send(routed)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to send packet to actor for ${formatPeerForLog(peerID)}: ${e.message}")
+                // Fallback to direct processing if actor fails
+                handleReceivedPacket(routed)
+            }
+        }
+    }
+    
     /**
-     * Check if we should process this packet.
-     * Returns true if the packet is new and valid.
+     * Set up the packet relay manager with its delegate
      */
-    fun shouldProcess(packet: HuzzPacket): Boolean {
-        // Ignore our own packets
-        val senderHex = packet.senderID.toHexString()
-        if (senderHex == myPeerID) {
-            return false
+    fun setupRelayManager() {
+        packetRelayManager.delegate = object : PacketRelayManagerDelegate {
+            override fun getNetworkSize(): Int {
+                return delegate?.getNetworkSize() ?: 1
+            }
+            
+            override fun getBroadcastRecipient(): ByteArray {
+                return delegate?.getBroadcastRecipient() ?: ByteArray(0)
+            }
+            
+            override fun broadcastPacket(routed: RoutedPacket) {
+                delegate?.relayPacket(routed)
+            }
+            override fun sendToPeer(peerID: String, routed: RoutedPacket): Boolean {
+                return delegate?.sendToPeer(peerID, routed) ?: false
+            }
+        }
+    }
+    
+    /**
+     * Handle received packet - core protocol logic (exact same as iOS)
+     */
+    private suspend fun handleReceivedPacket(routed: RoutedPacket) {
+        val packet = routed.packet
+        val peerID = routed.peerID?.takeIf { it.isNotBlank() && it != "unknown" }
+            ?: packet.senderID.toHexString()
+
+        // Basic validation and security checks
+        if (!delegate?.validatePacketSecurity(packet, peerID)!!) {
+            return
         }
 
-        // Check TTL
-        if (packet.ttl.toInt() <= 0) {
-            Log.d(TAG, "Dropping packet with expired TTL from $senderHex")
-            return false
+        var validPacket = true
+        val messageType = MessageType.fromValue(packet.type)
+        // Verbose logging to debug manager (and chat via ChatViewModel observer)
+        try {
+            val mt = messageType?.name ?: packet.type.toString()
+            val routeDevice = routed.relayAddress
+            val nick = delegate?.getPeerNickname(peerID)
+            debugManager?.logIncomingPacket(peerID, nick, mt, routeDevice)
+        } catch (_: Exception) { }
+        
+        
+        // Handle public packet types (no address check needed)
+        when (messageType) {
+            MessageType.ANNOUNCE -> validPacket = handleAnnounce(routed)
+            MessageType.MESSAGE -> handleMessage(routed)
+            MessageType.FILE_TRANSFER -> handleMessage(routed) // treat same routing path; parsing happens in handler
+            MessageType.VOICE_FRAME -> validPacket = delegate?.handleVoiceFrame(routed) ?: false
+            MessageType.LEAVE -> handleLeave(routed)
+            MessageType.FRAGMENT -> handleFragment(routed)
+            MessageType.REQUEST_SYNC -> handleRequestSync(routed)
+            MessageType.SOS_BEACON, MessageType.SOS_CANCEL -> handleMessage(routed)
+            else -> {
+                // Handle private packet types (address check required)
+                if (packetRelayManager.isPacketAddressedToMe(packet)) {
+                    when (messageType) {
+                        MessageType.NOISE_HANDSHAKE -> validPacket = handleNoiseHandshake(routed)
+                        MessageType.NOISE_ENCRYPTED -> validPacket = handleNoiseEncrypted(routed)
+                        MessageType.FILE_TRANSFER -> handleMessage(routed)
+                        else -> {
+                            validPacket = false
+                            Log.w(TAG, "Unknown message type: ${packet.type}")
+                        }
+                    }
+                } else {
+                    // Not addressed to us; only relay handling below applies
+                }
+            }
         }
-
-        // Dedup check
-        if (seenPackets.containsKey(packet.packetId)) {
-            Log.d(TAG, "Dropping duplicate packet ${packet.packetId}")
-            return false
+        
+        // Update last seen timestamp
+        if (validPacket) {
+            delegate?.updatePeerLastSeen(peerID)
+            
+            // CENTRALIZED RELAY LOGIC: Handle relay decisions for all packets not addressed to us
+            packetRelayManager.handlePacketRelay(routed)
         }
-
-        // Mark as seen
-        seenPackets[packet.packetId] = System.currentTimeMillis()
-
-        return true
+    }
+    
+    /**
+     * Handle Noise handshake message - SIMPLIFIED iOS-compatible version
+     */
+    private suspend fun handleNoiseHandshake(routed: RoutedPacket): Boolean {
+        return delegate?.handleNoiseHandshake(routed) ?: false
+    }
+    
+    /**
+     * Handle Noise encrypted transport message
+     * Returns false when decryption fails so undecryptable packets do not prove liveness.
+     */
+    private suspend fun handleNoiseEncrypted(routed: RoutedPacket): Boolean {
+        return delegate?.handleNoiseEncrypted(routed) ?: false
+    }
+    
+    /**
+     * Handle announce message
+     */
+    private suspend fun handleAnnounce(routed: RoutedPacket): Boolean {
+        return delegate?.handleAnnounce(routed) ?: false
+    }
+    
+    /**
+     * Handle regular message
+     */
+    private suspend fun handleMessage(routed: RoutedPacket) {
+        delegate?.handleMessage(routed)
+    }
+    
+    /**
+     * Handle leave message
+     */
+    private suspend fun handleLeave(routed: RoutedPacket) {
+        delegate?.handleLeave(routed)
+    }
+    
+    /**
+     * Handle message fragments
+     */
+    private suspend fun handleFragment(routed: RoutedPacket) {
+        val reassembledPacket = delegate?.handleFragment(routed.packet)
+        if (reassembledPacket != null) {
+            val originatorPeerID = reassembledPacket.senderID.toHexString()
+            handleReceivedPacket(
+                RoutedPacket(
+                    packet = reassembledPacket,
+                    peerID = routed.peerID?.takeIf { it.isNotBlank() && it != "unknown" } ?: originatorPeerID,
+                    relayAddress = routed.relayAddress,
+                    ingressLinkID = routed.ingressLinkID
+                )
+            )
+        }
+        
+        // Fragment relay is now handled by centralized PacketRelayManager
     }
 
     /**
-     * Check if a packet should be relayed to other peers.
-     * Returns true if TTL > 1 (still has hops left after decrement).
+     * Handle REQUEST_SYNC packets (public, TTL=1)
      */
-    fun shouldRelay(packet: HuzzPacket): Boolean {
-        // Don't relay if TTL would hit 0
-        if (packet.ttl.toInt() <= 1) return false
-
-        // Don't relay packets addressed directly to us
-        if (packet.recipientID != null) {
-            val recipientHex = packet.recipientID.toHexString()
-            if (recipientHex == myPeerID) return false
-        }
-
-        return true
+    private suspend fun handleRequestSync(routed: RoutedPacket) {
+        delegate?.handleRequestSync(routed)
     }
-
+    
     /**
-     * Check if a packet is addressed to us (or is a broadcast).
+     * Handle delivery acknowledgment
      */
-    fun isForUs(packet: HuzzPacket): Boolean {
-        // Broadcast packets are for everyone
-        if (packet.recipientID == null) return true
-
-        // Check if we're the recipient
-        val recipientHex = packet.recipientID.toHexString()
-        return recipientHex == myPeerID
-    }
-
+//    private suspend fun handleDeliveryAck(routed: RoutedPacket) {
+//        val peerID = routed.peerID ?: "unknown"
+//        Log.d(TAG, "Processing delivery ACK from ${formatPeerForLog(peerID)}")
+//        delegate?.handleDeliveryAck(routed)
+//    }
+    
     /**
-     * Periodic cleanup of old entries from the seen cache.
+     * Get debug information
      */
-    fun cleanupSeenCache() {
-        val now = System.currentTimeMillis()
-        val expired = seenPackets.filter {
-            (now - it.value) > MeshConstants.SEEN_CACHE_EXPIRY_MS
-        }
-        expired.keys.forEach { seenPackets.remove(it) }
-
-        // Also enforce max size by removing oldest entries
-        if (seenPackets.size > MeshConstants.SEEN_CACHE_MAX_SIZE) {
-            val toRemove = seenPackets.entries
-                .sortedBy { it.value }
-                .take(seenPackets.size - MeshConstants.SEEN_CACHE_MAX_SIZE)
-            toRemove.forEach { seenPackets.remove(it.key) }
+    fun getDebugInfo(): String {
+        return buildString {
+            appendLine("=== Packet Processor Debug Info ===")
+            appendLine("Processor Scope Active: ${processorScope.isActive}")
+            appendLine("Active Peer Actors: ${actors.size}")
+            appendLine("My Peer ID: $myPeerID")
+            
+            if (actors.isNotEmpty()) {
+                appendLine("Peer Actors:")
+                actors.keys.forEach { peerID ->
+                    appendLine("  - $peerID")
+                }
+            }
         }
     }
-
+    
     /**
-     * Clear all seen packets (for panic mode).
+     * Shutdown the processor and all peer actors
      */
-    fun clearAll() {
-        seenPackets.clear()
+    fun shutdown() {
+        Log.d(TAG, "Shutting down PacketProcessor and ${actors.size} peer actors")
+        
+        // Close all peer actors gracefully
+        actors.values.forEach { actor ->
+            actor.close()
+        }
+        actors.clear()
+        
+        // Shutdown the relay manager
+        packetRelayManager.shutdown()
+        
+        // Cancel the main scope
+        processorScope.cancel()
     }
+}
 
-    fun getSeenCount(): Int = seenPackets.size
+/**
+ * Delegate interface for packet processor callbacks
+ */
+interface PacketProcessorDelegate {
+    // Security validation
+    fun validatePacketSecurity(packet: HuzzPacket, peerID: String): Boolean
+    
+    // Peer management
+    fun updatePeerLastSeen(peerID: String)
+    fun getPeerNickname(peerID: String): String?
+    
+    // Network information
+    fun getNetworkSize(): Int
+    fun getBroadcastRecipient(): ByteArray
+    
+    // Message type handlers
+    fun handleNoiseHandshake(routed: RoutedPacket): Boolean
+    fun handleNoiseEncrypted(routed: RoutedPacket): Boolean
+    suspend fun handleAnnounce(routed: RoutedPacket): Boolean
+    fun handleMessage(routed: RoutedPacket)
+    fun handleVoiceFrame(routed: RoutedPacket): Boolean = false
+    fun handleLeave(routed: RoutedPacket)
+    fun handleFragment(packet: HuzzPacket): HuzzPacket?
+    fun handleRequestSync(routed: RoutedPacket)
+    
+    // Communication
+    fun sendAnnouncementToPeer(peerID: String)
+    fun sendCachedMessages(peerID: String)
+    fun relayPacket(routed: RoutedPacket)
+    fun sendToPeer(peerID: String, routed: RoutedPacket): Boolean
 }
