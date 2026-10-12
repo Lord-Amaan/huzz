@@ -1,0 +1,49 @@
+[
+  {
+    "id": "ds-01",
+    "title": "Earthquake: Drop, Cover, and Hold On Protocol",
+    "category": "DISASTER_PREP",
+    "summary": "Proven defensive response during seismic shaking to avoid falling structural debris and non-structural hazards.",
+    "contentMarkdown": "# Earthquake Survival Actions\n\nDuring an earthquake, violent ground shaking makes walking or running hazardous. Most injuries occur from falling ceiling tiles, glass, bookcases, and unanchored fixtures rather than building collapse.\n\n### DO NOT\n* Do not run outside while shaking is active; falling facades and bricks are fatal.\n* Do not stand in doorways (modern interior doorways are no stronger than other parts of the house and do not shield from flying debris).",
+    "steps": [
+      "DROP down: Immediately drop onto your hands and knees. This posture protects you from being knocked down and allows crawling if needed.",
+      "COVER head and neck: Crawl underneath a sturdy desk, table, or heavy furniture. If no shelter is nearby, crawl next to an interior wall away from windows and cover your head with both arms.",
+      "HOLD ON: Hold onto the table leg or furniture shelter with one hand and stay prepared to move with it as it shifts.",
+      "Stay put until shaking stops: Count to 60 after shaking ceases before moving to ensure aftershocks have subsided.",
+      "Evacuate safely: Check for gas smells and fire hazards. Use stairs only—never take an elevator."
+    ],
+    "tags": ["earthquake", "shaking", "tremor", "drop cover hold", "collapse", "debris", "aftershock"],
+    "sourceManual": "FEMA Earthquake Safety Checklist & Great ShakeOut Protocol"
+  },
+  {
+    "id": "ds-02",
+    "title": "Emergency Signaling: Whistle, Mirror, & Ground Markers",
+    "category": "SIGNALING",
+    "summary": "Audible and visual signaling methods for search-and-rescue teams (SAR) and aircraft.",
+    "contentMarkdown": "# Emergency Signaling Protocols\n\nSignaling devices conserve human voice and physical energy. Audible whistle blasts travel significantly further through fog, wind, and forest canopy than shouting.\n\n### International Distress Rule\n* The universal emergency distress signal is THREE of any signal (3 whistle blasts, 3 fires/smokes, 3 mirror flashes, 3 gunshots).",
+    "steps": [
+      "Whistle code: Blow 3 sharp, loud whistle blasts. Pause for 5 seconds to listen for replies. Repeat every 1-2 minutes.",
+      "Signaling mirror: Hold the mirror near your cheek with one eye looking through the sighting hole (or over the top). Extend your free hand toward the target aircraft or ridge. Tilt the mirror until the reflected sun spot falls across your extended fingers, then sweep across the target.",
+      "Ground-to-Air markers: Construct large high-contrast letters on open ground using rocks, logs, or stomped snow. International symbols: 'V' = Require Assistance, 'X' = Require Medical Assistance, 'NO' = Negative, 'Y' = Yes.",
+      "Night flashlights: Flash SOS in Morse code: 3 short flashes, 3 long flashes, 3 short flashes (... --- ...). Pause 10 seconds and repeat."
+    ],
+    "tags": ["signaling", "sos", "whistle", "mirror", "rescue", "aircraft", "distress", "sar", "search and rescue"],
+    "sourceManual": "International Aeronautical and Maritime Search and Rescue (IAMSAR) Manual"
+  },
+  {
+    "id": "ds-03",
+    "title": "Flood & Flash Flood Survival Guide",
+    "category": "DISASTER_PREP",
+    "summary": "Evacuation, high-ground relocation, and vehicle egress rules during rapid water rise and flash flooding.",
+    "contentMarkdown": "# Flood and Torrential Water Safety\n\nWater weighs approximately 62.4 pounds per cubic foot. Six inches of rapid floodwater can sweep adult humans off their feet, and 12-18 inches will float and carry away most standard vehicles.\n\n### Rule of Thumb\n* Turn Around, Don't Drown: Never walk, swim, or drive through moving water whose depth and road integrity cannot be confirmed.",
+    "steps": [
+      "Move to high ground: Immediately evacuate low-lying valleys, basements, and flood plains to designated high ground.",
+      "Avoid flood waters: Never wade through floodwaters; they carry sewage, industrial contaminants, live downed electric wires, and hidden open manholes.",
+      "Vehicle emergency egress: If your vehicle stalls in rising water, abandon it immediately and seek higher elevation on foot before doors are trapped by external water pressure.",
+      "Disconnect utilities: Turn off main electrical breaker switch and main gas valve before evacuating if safe to do so.",
+      "Disinfect before use: Assume all local tap water is contaminated until official municipal boil-water advisories are lifted."
+    ],
+    "tags": ["flood", "flash flood", "water surge", "storm", "hurricane", "drown", "evacuate", "high ground"],
+    "sourceManual": "National Weather Service / FEMA Flood Safety"
+  }
+]

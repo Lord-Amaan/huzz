@@ -1,0 +1,84 @@
+[
+  {
+    "id": "fa-01",
+    "title": "Severe Hemorrhaging & Tourniquet Application",
+    "category": "TRAUMA_CPR",
+    "summary": "Protocol for controlling life-threatening arterial or venous extremity bleeding using direct pressure, pressure dressings, or windlass tourniquets.",
+    "contentMarkdown": "# Severe Bleeding & Tourniquet Application\n\nLife-threatening bleeding can cause shock and loss of consciousness in under 2 minutes. Immediate intervention is required before treating other injuries.\n\n### Critical Principles\n* Always pack junctional wounds (groin, armpit, neck) where a tourniquet cannot fit.\n* Never place a tourniquet directly over a joint (knee or elbow).\n* Never loosen or remove a tourniquet once secured; only medical professionals at higher levels of care should release it.\n* Document the application time prominently on the patient's forehead or tourniquet time strap (e.g., 'T 14:30').",
+    "steps": [
+      "Expose the wound: Cut or tear clothing away to identify the exact origin of bleeding.",
+      "Apply direct pressure: Place sterile gauze or cleanest available cloth over the wound and push with full body weight directly on the bleeding vessel.",
+      "Position tourniquet: Place the tourniquet 2 to 3 inches above the wound on the extremity, between the wound and the heart (never on a joint).",
+      "Tighten the windlass: Turn the windlass rod until bright red bleeding ceases completely and the distal pulse is no longer palpable.",
+      "Lock and record: Clip the windlass securely into the windlass catch. Note the exact time of application (e.g., T 15:45) on the time strap or skin."
+    ],
+    "tags": ["bleeding", "blood", "tourniquet", "hemorrhage", "artery", "wound", "trauma", "cut"],
+    "sourceManual": "Red Cross Emergency First Aid Handbook (Tactical Combat Casualty Care compliant)"
+  },
+  {
+    "id": "fa-02",
+    "title": "Adult Cardiopulmonary Resuscitation (CPR)",
+    "category": "TRAUMA_CPR",
+    "summary": "Standard hands-only and rescue breath CPR protocol for unconscious adults with absent or abnormal breathing.",
+    "contentMarkdown": "# Adult Cardiopulmonary Resuscitation (CPR)\n\nCardiac arrest occurs when the heart stops pumping blood. Immediate chest compressions circulate oxygenated blood to the brain and vital organs until an AED or defibrillator is secured.\n\n### Key Metrics\n* Rate: 100 to 120 compressions per minute (to the rhythm of 'Stayin' Alive').\n* Depth: At least 2 inches (5 cm), allowing complete chest recoil between strokes.\n* Ratio: 30 compressions followed by 2 gentle rescue breaths (if trained), or continuous hands-only compressions.",
+    "steps": [
+      "Check responsiveness: Shake shoulders gently and shout 'Are you okay?'. Check carotid pulse and normal breathing for no more than 10 seconds.",
+      "Call for help: Designate a specific bystander to call emergency services and locate an AED.",
+      "Hand placement: Place the heel of one hand in the center of the chest (lower half of breastbone). Interlock fingers of your other hand on top.",
+      "Compress hard & fast: Keep arms straight, shoulders over hands. Push down at least 2 inches at a rate of 100-120 beats per minute.",
+      "Allow full chest recoil: Do not lean on the chest between compressions to allow heart refilling.",
+      "Rescue breaths (optional): Tilt head back, lift chin, pinch nose, deliver 2 gentle breaths (1 second each) until chest visibly rises, then resume compressions immediately."
+    ],
+    "tags": ["cpr", "heart attack", "cardiac arrest", "unconscious", "breathing", "pulse", "chest compressions", "resuscitation"],
+    "sourceManual": "American Heart Association / Red Cross BLS Guidelines"
+  },
+  {
+    "id": "fa-03",
+    "title": "Choking Emergency (Heimlich Maneuver)",
+    "category": "FIRST_AID",
+    "summary": "Protocol for clearing complete airway obstruction in conscious adults, children, and infants.",
+    "contentMarkdown": "# Foreign Body Airway Obstruction (Choking)\n\nA person experiencing severe airway obstruction cannot speak, cough forcefully, or breathe, and often clutches their throat with both hands (universal choking sign).\n\n### Warning\n* Do not perform blind finger sweeps in the mouth as this can push the object deeper.\n* For an infant (under 1 year), deliver 5 firm back blows followed by 5 chest thrusts instead of abdominal thrusts.",
+    "steps": [
+      "Confirm choking: Ask 'Are you choking? Can you speak?'. If they cannot cough or talk, initiate assistance immediately.",
+      "Position behind patient: Stand behind the person and wrap your arms around their waist.",
+      "Fist placement: Make a fist with one hand. Place the thumb side slightly above their navel (well below the ribcage).",
+      "Deliver upward thrusts: Grasp your fist with your other hand. Pull sharply inward and upward into their abdomen with quick thrusts.",
+      "Repeat until cleared: Continue rapid thrusts until the foreign object is expelled or the person becomes unconscious.",
+      "If unconscious: Lower them gently to the ground and begin standard CPR starting with chest compressions."
+    ],
+    "tags": ["choking", "heimlich", "airway", "throat", "suffocation", "swallow", "blocked airway"],
+    "sourceManual": "Red Cross Emergency First Aid Handbook"
+  },
+  {
+    "id": "fa-04",
+    "title": "Burns: First, Second, and Third Degree Management",
+    "category": "FIRST_AID",
+    "summary": "Immediate cooling, stabilization, and dressing guidelines for thermal, chemical, and electrical burns.",
+    "contentMarkdown": "# Burn Assessment and Emergency Treatment\n\nBurns damage skin layers and compromise the body's infection barrier and fluid regulation.\n\n### Classifications\n* 1st Degree: Superficial redness, mild pain, dry skin (sunburn).\n* 2nd Degree: Partial thickness, blistering, severe pain, swelling.\n* 3rd Degree: Full thickness, charred white or black leather-like skin, numbness due to destroyed nerve endings.\n\n### Do NOT\n* Never pop blisters.\n* Never apply ice, butter, grease, toothpaste, or ointments to raw burns.\n* Do not peel off clothing stuck to burned flesh; cut around it.",
+    "steps": [
+      "Remove source: Remove heat source immediately. For chemical burns, brush off dry chemicals then flush with continuous water for 20 minutes.",
+      "Cool the burn: Submerge or run clean, cool (not ice cold) tap or bottled water over the burn for at least 10-15 minutes.",
+      "Remove jewelry: Take off rings, watches, and restrictive items around the burned area before swelling occurs.",
+      "Cover loosely: Cover the area with a clean, dry, non-adherent sterile dressing or clean plastic cling wrap to prevent infection.",
+      "Prevent shock: Keep the patient warm with a dry blanket over unburned areas and elevate burned extremities if possible."
+    ],
+    "tags": ["burn", "fire", "heat", "blister", "scald", "chemical burn", "thermal", "sunburn"],
+    "sourceManual": "WHO & Red Cross First Aid Management of Burns"
+  },
+  {
+    "id": "fa-05",
+    "title": "Hypothermia & Frostbite Stabilization",
+    "category": "FIRST_AID",
+    "summary": "Field rewarming protocols for core temperature drop and localized freezing injuries in cold environments.",
+    "contentMarkdown": "# Hypothermia and Cold Exposure\n\nHypothermia occurs when core body temperature drops below 35°C (95°F). Early signs include intense shivering, slurred speech, clumsy hands, and confusion.\n\n### Caution\n* Do not rub frostbitten skin or massage limbs—ice crystals inside tissue will cut cells.\n* Do not apply direct hot flame, heating pads, or hot water bottles directly to bare skin.",
+    "steps": [
+      "Shelter from cold: Move the individual to a sheltered, dry environment away from wind and wet ground.",
+      "Remove wet clothes: Carefully remove wet clothing and wrap the patient in multiple dry blankets, sleeping bags, or thermal space blankets.",
+      "Insulate from ground: Place sleeping pads, dry foliage, or clothing beneath the patient to block conductive ground heat loss.",
+      "Core rewarming: Focus warmth on the chest, neck, and groin using warm dry packs wrapped in cloth or skin-to-skin body heat.",
+      "Warm fluids: If the patient is fully conscious and capable of swallowing, administer warm, sweetened non-alcoholic and non-caffeinated liquids."
+    ],
+    "tags": ["hypothermia", "cold", "freezing", "frostbite", "shivering", "winter", "exposure"],
+    "sourceManual": "Wilderness Medical Society Clinical Practice Guidelines"
+  }
+]

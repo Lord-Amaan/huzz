@@ -1,0 +1,70 @@
+[
+  {
+    "id": "ws-01",
+    "title": "Water Disinfection: Boiling & Heat Pasteurization",
+    "category": "WATER_SANITATION",
+    "summary": "Gold standard thermal disinfection method for eliminating pathogenic bacteria, viruses, and protozoan parasites from raw water.",
+    "contentMarkdown": "# Water Boiling Protocol\n\nBoiling is the most reliable method to kill disease-causing microorganisms, including Giardia, Cryptosporidium, Salmonella, and Vibrio cholerae.\n\n### Altitude Adjustment\n* Sea level up to 1,000 meters (3,300 ft): 1 full rolling boil minute is sufficient.\n* Above 1,000 meters: Boil vigorously for 3 full minutes (water boils at lower temperature at high altitude).",
+    "steps": [
+      "Clarify turbid water: If water contains silt or organic debris, filter through clean cloth, paper towel, or let it settle in a container for 30 minutes to decant clear water.",
+      "Bring to rolling boil: Heat clear water in a clean pot until large bubbles continuously break the surface vigorously.",
+      "Maintain timer: Maintain rolling boil for at least 1 full minute (3 minutes at elevations over 1,000 m / 3,300 ft).",
+      "Cool safely: Cover with a clean lid and allow to cool naturally. Store in a disinfected, sealed container.",
+      "Aerate for taste: Boiled water tastes flat; pour it repeatedly back and forth between two clean containers to reintroduce oxygen."
+    ],
+    "tags": ["water", "boiling", "purification", "disinfection", "drink", "bacteria", "parasite", "giardia", "cholera"],
+    "sourceManual": "CDC & World Health Organization (WHO) Guidelines for Drinking-Water Quality"
+  },
+  {
+    "id": "ws-02",
+    "title": "Chemical Disinfection: Household Chlorine Bleach",
+    "category": "WATER_SANITATION",
+    "summary": "Standard chemical chlorination ratio using unscented regular liquid household bleach (6% to 8.25% sodium hypochlorite).",
+    "contentMarkdown": "# Emergency Chemical Water Disinfection\n\nWhen fuel or fire is unavailable for boiling, unscented plain household bleach can purify water for drinking.\n\n### Critical Safety Rule\n* NEVER use scented bleach, color-safe bleach, or bleach with added cleansers or fragrance—these contain toxic industrial additives.",
+    "steps": [
+      "Check label: Verify the bottle says 'Regular Unscented Liquid Bleach' containing sodium hypochlorite (5%–9%).",
+      "Ratio for CLEAR water: Add 2 drops of regular bleach per 1 Liter (or 8 drops per 1 Gallon / 3.8 L) of clear water.",
+      "Ratio for CLOUDY or cold water: Add 4 drops of regular bleach per 1 Liter (or 16 drops per 1 Gallon) of turbid water.",
+      "Mix thoroughly: Stir or shake vigorously for 30 seconds.",
+      "Wait 30 minutes: Let the container stand tightly covered for at least 30 minutes before drinking.",
+      "Check odor: Water should have a very faint chlorine smell. If no chlorine scent is detected, repeat dose with half amount and wait another 15 minutes."
+    ],
+    "tags": ["water", "bleach", "chlorine", "chemical", "purify", "disinfect", "flood", "drops", "clean water"],
+    "sourceManual": "EPA Emergency Disinfection of Drinking Water Guidelines"
+  },
+  {
+    "id": "ws-03",
+    "title": "Solar Water Disinfection (SODIS Protocol)",
+    "category": "WATER_SANITATION",
+    "summary": "Low-cost ultraviolet and thermal pathogen destruction using clear PET plastic bottles and direct sunlight.",
+    "contentMarkdown": "# Solar Disinfection (SODIS)\n\nUV-A rays from sunlight kill bacterial pathogens, viruses, and parasites through DNA damage and thermal heating inside transparent bottles.\n\n### Equipment\n* Clean, transparent PET plastic bottles (under 2 Liters, not colored, without scratches).\n* Reflective surface (corrugated metal roof or aluminum foil) boosts efficiency.",
+    "steps": [
+      "Clean bottle: Wash clean clear PET bottles thoroughly.",
+      "Fill with clear water: Fill bottle 3/4 full with clear water, cap tightly, and shake vigorously for 20 seconds to oxygenate.",
+      "Top off: Fill the remaining space to the brim and seal tightly.",
+      "Expose to direct sun: Place bottles horizontally on a reflective surface (e.g. tin roof) in direct unshaded sunlight.",
+      "Duration: Leave in direct full sun for at least 6 consecutive hours (or 2 full days if the sky is overcast / 50% cloud cover).",
+      "Consume directly: Drink straight from the bottle or pour into sterile cups to prevent recontamination."
+    ],
+    "tags": ["sodis", "solar", "sun", "uv", "pet bottle", "off-grid", "purification", "natural water"],
+    "sourceManual": "Swiss Federal Institute of Aquatic Science (Eawag) / WHO SODIS Manual"
+  },
+  {
+    "id": "ws-04",
+    "title": "Improvised Charcoal & Sand Bio-Filter",
+    "category": "WATER_SANITATION",
+    "summary": "Constructing a multi-stage physical and chemical adsorption filter using charcoal, sand, and gravel in a container.",
+    "contentMarkdown": "# Improvised Bio-Sand Charcoal Filter\n\nThis filter removes suspended particulates, silt, heavy metals, odors, and organic impurities from muddy or turbid water. Note: physical filters do not kill microscopic viruses; water MUST be boiled or chlorinated after filtration.",
+    "steps": [
+      "Prepare container: Cut the bottom off a plastic bottle, bamboo stalk, or bucket. Punch small drain holes in the cap or base.",
+      "Base layer: Stuff a clean cloth, cotton balls, or unbleached fabric at the spout to keep sand from escaping.",
+      "Activated charcoal layer: Crush hardwood charcoal (from non-toxic wood fire) into pea-sized bits. Add a 3 to 4 inch layer to absorb chemicals and odors.",
+      "Fine sand layer: Add 3 to 4 inches of clean fine sand above the charcoal.",
+      "Coarse gravel layer: Add 2 inches of small pebbles and gravel on top to catch large debris without disrupting the sand bed.",
+      "Run flush water: Slowly pour raw water through and discard the first 2-3 liters until output flows completely transparent.",
+      "Disinfect filtrate: Boil or chlorinate the clarified output before drinking."
+    ],
+    "tags": ["filter", "charcoal", "sand", "gravel", "turbid", "muddy water", "improvised", "diy filter"],
+    "sourceManual": "US Army Survival Field Manual FM 21-76"
+  }
+]
