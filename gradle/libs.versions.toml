@@ -38,6 +38,7 @@ nordic-ble = "2.11.0"
 
 # WebSocket
 okhttp = "5.4.0"
+mediapipe-genai = "0.10.35"
 
 # Google Play Services
 gms-location = "21.4.0"
@@ -110,6 +111,7 @@ nordic-ble = { module = "no.nordicsemi.android:ble", version.ref = "nordic-ble" 
 
 # WebSocket
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+mediapipe-tasks-genai = { module = "com.google.mediapipe:tasks-genai", version.ref = "mediapipe-genai" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3", version.ref = "okhttp" }
 
 # Google Play Services

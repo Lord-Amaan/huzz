@@ -45,7 +45,20 @@ fun HuzzAiSheet(
     val showModelHub by viewModel.showModelHub.collectAsStateWithLifecycle()
     val selectedChunkForDetail by viewModel.selectedChunkForDetail.collectAsStateWithLifecycle()
     val activeTier by viewModel.modelManager.activeTier.collectAsStateWithLifecycle()
+    val aiAnswer by viewModel.aiAnswer.collectAsStateWithLifecycle()
+    val promptDismissed by viewModel.downloadPromptDismissed.collectAsStateWithLifecycle()
+    val downloadStates by viewModel.modelManager.downloadStates.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+
+    // Free the on-device model's RAM when HuzzAi is closed.
+    DisposableEffect(Unit) {
+        onDispose { viewModel.onSheetClosed() }
+    }
+
+    fun ask() {
+        focusManager.clearFocus()
+        viewModel.askAi()
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -135,11 +148,36 @@ fun HuzzAiSheet(
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                keyboardActions = KeyboardActions(onSearch = { ask() }),
                 singleLine = true,
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Ask button: runs the on-device model (or shows manual steps without one)
+            if (searchQuery.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val streaming = aiAnswer?.streaming == true
+                Button(
+                    onClick = { if (streaming) viewModel.stopAi() else ask() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = if (streaming) Icons.Default.Stop else Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        when {
+                            streaming -> "Stop"
+                            activeTier != null -> "Ask HuzzAi (offline AI)"
+                            else -> "Get answer"
+                        }
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -178,7 +216,11 @@ fun HuzzAiSheet(
                 }
             } else {
                 val chunks = searchResult?.localChunks ?: emptyList()
-                val synthesized = searchResult?.synthesizedResponse
+                val answer = aiAnswer?.takeIf { it.query == searchQuery.trim() }
+                val anyModelOnDisk = downloadStates.values.any {
+                    it is com.example.huzz.huzzai.model.ModelDownloadState.Ready ||
+                        it is com.example.huzz.huzzai.model.ModelDownloadState.Downloading
+                }
 
                 if (chunks.isEmpty() && searchQuery.isNotBlank()) {
                     // Zero hits state -> Ask the Mesh fallback
@@ -197,15 +239,20 @@ fun HuzzAiSheet(
                             .weight(1f)
                             .padding(bottom = 16.dp)
                     ) {
-                        // AI Synthesized Response Card (if available)
-                        if (!synthesized.isNullOrBlank()) {
+                        // Nudge to download a model while internet is available
+                        if (activeTier == null && !anyModelOnDisk && !promptDismissed) {
                             item {
-                                GroundedSynthesisCard(
-                                    responseMarkdown = synthesized,
-                                    tier = activeTier,
-                                    latencyMs = searchResult?.latencyMs ?: 0L
+                                DownloadModelPrompt(
+                                    recommended = viewModel.modelManager.recommendedTier,
+                                    onOpenHub = { viewModel.openModelHub() },
+                                    onDismiss = { viewModel.dismissDownloadPrompt() }
                                 )
                             }
+                        }
+
+                        // On-device AI answer (streams while generating)
+                        if (answer != null) {
+                            item { AiAnswerCard(answer) }
                         }
 
                         // Verified Manual Cards
@@ -239,10 +286,68 @@ fun HuzzAiSheet(
 }
 
 @Composable
+private fun DownloadModelPrompt(
+    recommended: com.example.huzz.huzzai.model.HuzzAiModelTier,
+    onOpenHub: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Get written AI answers, fully offline", fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Download a model while you have internet. It runs on your phone with no connection. " +
+                    "Recommended for this phone: ${recommended.displayName} (${recommended.downloadSizeBytes / 1_000_000} MB).",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onOpenHub) { Text("Choose model") }
+                TextButton(onClick = onDismiss) { Text("Not now") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AiAnswerCard(answer: HuzzAiViewModel.AiAnswerState) {
+    val loading = answer.loadingModel
+    when {
+        loading != null -> GroundedSynthesisCard(
+            responseMarkdown = "Loading ${loading.displayName} into memory. The first answer takes a few seconds.",
+            tier = loading,
+            latencyMs = 0L,
+            title = "Preparing offline AI",
+            showProgress = true
+        )
+        answer.text.isEmpty() && answer.streaming -> GroundedSynthesisCard(
+            responseMarkdown = "Thinking...",
+            tier = null,
+            latencyMs = 0L,
+            showProgress = true
+        )
+        else -> GroundedSynthesisCard(
+            responseMarkdown = answer.text + if (answer.streaming) " ▍" else "",
+            tier = answer.tier,
+            latencyMs = answer.latencyMs,
+            title = if (answer.fromModel || answer.streaming) "AI Synthesized Guidance" else "Manual Guidance",
+            note = answer.note
+        )
+    }
+}
+
+@Composable
 private fun GroundedSynthesisCard(
     responseMarkdown: String,
     tier: com.example.huzz.huzzai.model.HuzzAiModelTier?,
-    latencyMs: Long
+    latencyMs: Long,
+    title: String = "AI Synthesized Guidance",
+    note: String? = null,
+    showProgress: Boolean = false
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -268,15 +373,15 @@ private fun GroundedSynthesisCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "AI Synthesized Guidance",
+                        text = title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
 
-                Text(
-                    text = "${tier?.parameterSize ?: ""} (${latencyMs}ms)",
+                if (tier != null || latencyMs > 0) Text(
+                    text = listOfNotNull(tier?.parameterSize, latencyMs.takeIf { it > 0 }?.let { "${it}ms" }).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -284,10 +389,28 @@ private fun GroundedSynthesisCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+            if (showProgress) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            note?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
             Text(
                 text = responseMarkdown,
                 style = MaterialTheme.typography.bodyMedium,
                 lineHeight = 22.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Life in danger? Contact emergency services (e.g. 112) or nearby people first.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error
             )
         }
     }

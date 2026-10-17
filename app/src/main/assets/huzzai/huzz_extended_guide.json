@@ -1,0 +1,916 @@
+[
+  {
+    "id": "hx-heart-attack",
+    "title": "Heart attack (chest pain)",
+    "category": "TRAUMA_CPR",
+    "summary": "A heart attack is when blood flow to the heart is blocked; act fast and call for help immediately.",
+    "contentMarkdown": "# Heart attack (chest pain)\n\nWarning signs: pain, pressure or tightness in the chest that may spread to the arms, jaw, neck, back or stomach; shortness of breath; sweating; feeling sick or light-headed. Women, older people and people with diabetes may have milder or unusual symptoms.",
+    "steps": [
+      "Call your emergency number (e.g. 112) immediately, or send someone to get help through the mesh.",
+      "Help the person sit down and rest in a comfortable position, usually half-sitting with knees bent; loosen tight clothing.",
+      "If they are not allergic and have not been told to avoid it, give one adult aspirin (300 mg) to chew slowly.",
+      "If they have their own prescribed heart medicine (such as a nitroglycerin/GTN spray), help them take it.",
+      "Keep them calm and still; do not let them walk around. Do not give food or drink other than the aspirin.",
+      "Watch their breathing. If they become unresponsive and stop breathing normally, start CPR and use an AED if one is available."
+    ],
+    "tags": [
+      "heart",
+      "attack",
+      "chest",
+      "pain",
+      "cardiac",
+      "angina",
+      "aspirin",
+      "pressure"
+    ],
+    "sourceManual": "Red Cross / NHS / AHA first aid guidance"
+  },
+  {
+    "id": "hx-stroke",
+    "title": "Stroke (FAST check)",
+    "category": "FIRST_AID",
+    "summary": "A stroke is a medical emergency; use FAST to spot it and get help immediately.",
+    "contentMarkdown": "# Stroke (FAST check)\n\nFace: has their face drooped on one side, can they smile? Arms: can they raise both arms and keep them there? Speech: is their speech slurred or confused? Time: call emergency services immediately if you see any one of these signs.",
+    "steps": [
+      "Check FAST: Face drooping, Arm weakness, Speech difficulty, Time to call for help.",
+      "Call your emergency number immediately and note the time symptoms started; this guides hospital treatment.",
+      "Keep the person comfortable and supported, lying on their side if they are drowsy or vomiting.",
+      "Do not give them anything to eat or drink, and do not give aspirin, since some strokes are caused by bleeding.",
+      "Stay with them and watch their breathing; start CPR if they become unresponsive and stop breathing normally."
+    ],
+    "tags": [
+      "stroke",
+      "face",
+      "drooping",
+      "arm",
+      "weakness",
+      "slurred",
+      "speech",
+      "fast",
+      "paralysis"
+    ],
+    "sourceManual": "NHS / American Stroke Association guidance"
+  },
+  {
+    "id": "hx-emergency-numbers",
+    "title": "Calling for help",
+    "category": "SIGNALING",
+    "summary": "If any phone network is available, call your local emergency number first.",
+    "contentMarkdown": "# Calling for help\n\n* If any phone network is available, call your local emergency number first.\n* 112 works on mobile phones across Europe, India and many other countries, and often reaches emergency services even without a SIM or credit.\n* In the USA and Canada dial 911.\n* State your exact location first, then what happened, how many people are hurt, and stay on the line until told to hang up.\n* If calls fail, try sending an SMS; text messages often get through when voice calls cannot.\n* If there is no network at all, use the Huzz mesh chat to reach nearby people who may have a connection or can carry a message.",
+    "steps": [
+      "112 works on mobile phones across Europe, India and many other countries, and often reaches emergency services even without a SIM or credit.",
+      "In the USA and Canada dial 911.",
+      "State your exact location first, then what happened, how many people are hurt, and stay on the line until told to hang up.",
+      "If calls fail, try sending an SMS; text messages often get through when voice calls cannot.",
+      "If there is no network at all, use the Huzz mesh chat to reach nearby people who may have a connection or can carry a message."
+    ],
+    "tags": [
+      "call",
+      "help",
+      "emergency",
+      "number",
+      "112",
+      "911",
+      "108",
+      "ambulance",
+      "police",
+      "rescue",
+      "sos"
+    ],
+    "sourceManual": "General emergency guidance"
+  },
+  {
+    "id": "hx-trapped-rubble",
+    "title": "If you are trapped under rubble",
+    "category": "DISASTER_PREP",
+    "summary": "If trapped under debris: do not light a match or lighter, because there may be leaking gas.",
+    "contentMarkdown": "# If you are trapped under rubble\n\n* If trapped under debris: do not light a match or lighter, because there may be leaking gas.\n* Do not move about or kick up dust.\n* Cover your mouth and nose with cloth or clothing to filter dust.\n* Tap on a pipe or wall so rescuers can hear you, or use a whistle.\n* Shout only as a last resort, because shouting makes you inhale dust and uses energy.\n* Use your phone torch sparingly to save battery.\n* Keep still and calm, and conserve water if you have any.",
+    "steps": [
+      "Do not move about or kick up dust.",
+      "Cover your mouth and nose with cloth or clothing to filter dust.",
+      "Tap on a pipe or wall so rescuers can hear you, or use a whistle.",
+      "Shout only as a last resort, because shouting makes you inhale dust and uses energy.",
+      "Use your phone torch sparingly to save battery.",
+      "Keep still and calm, and conserve water if you have any."
+    ],
+    "tags": [
+      "trapped",
+      "rubble",
+      "debris",
+      "collapsed",
+      "building",
+      "stuck",
+      "buried",
+      "earthquake",
+      "pinned"
+    ],
+    "sourceManual": "FEMA / Red Cross earthquake guidance"
+  },
+  {
+    "id": "hx-earthquake-after",
+    "title": "After an earthquake",
+    "category": "DISASTER_PREP",
+    "summary": "Expect aftershocks; Drop, Cover and Hold On each time.",
+    "contentMarkdown": "# After an earthquake\n\n* Expect aftershocks; Drop, Cover and Hold On each time.\n* Check yourself and others for injuries and give first aid.\n* If you smell gas or hear hissing, open windows, leave immediately and do not use switches, flames or phones inside.\n* Do not use elevators.\n* Leave damaged buildings and do not re-enter until declared safe.\n* Wear sturdy shoes because of broken glass.\n* If you are near the coast and the shaking was strong or lasted a long time, move to high ground immediately because a tsunami may follow.",
+    "steps": [
+      "Check yourself and others for injuries and give first aid.",
+      "If you smell gas or hear hissing, open windows, leave immediately and do not use switches, flames or phones inside.",
+      "Do not use elevators.",
+      "Leave damaged buildings and do not re-enter until declared safe.",
+      "Wear sturdy shoes because of broken glass.",
+      "If you are near the coast and the shaking was strong or lasted a long time, move to high ground immediately because a tsunami may follow."
+    ],
+    "tags": [
+      "after",
+      "earthquake",
+      "aftershock",
+      "gas",
+      "leak",
+      "damaged",
+      "building",
+      "evacuate",
+      "check"
+    ],
+    "sourceManual": "FEMA / Red Cross earthquake guidance"
+  },
+  {
+    "id": "hx-tsunami",
+    "title": "Tsunami warning signs and action",
+    "category": "DISASTER_PREP",
+    "summary": "Natural warning signs of a tsunami: a strong or long earthquake near the coast, the sea suddenly drawing back and exposing the seabed, or a loud roar from the ocean.",
+    "contentMarkdown": "# Tsunami warning signs and action\n\n* Natural warning signs of a tsunami: a strong or long earthquake near the coast, the sea suddenly drawing back and exposing the seabed, or a loud roar from the ocean.\n* Do not wait for an official warning.\n* Move immediately to high ground or as far inland as possible, on foot if roads are jammed.\n* If you cannot leave the area, go to the upper floors or roof of a strong concrete building.\n* A tsunami is a series of waves, and later waves can be bigger; stay on high ground until officials say it is safe, which can be many hours.",
+    "steps": [
+      "Do not wait for an official warning.",
+      "Move immediately to high ground or as far inland as possible, on foot if roads are jammed.",
+      "If you cannot leave the area, go to the upper floors or roof of a strong concrete building.",
+      "A tsunami is a series of waves, and later waves can be bigger; stay on high ground until officials say it is safe, which can be many hours."
+    ],
+    "tags": [
+      "tsunami",
+      "wave",
+      "sea",
+      "coast",
+      "ocean",
+      "water",
+      "receding",
+      "beach",
+      "high",
+      "ground"
+    ],
+    "sourceManual": "NOAA / UNESCO tsunami guidance"
+  },
+  {
+    "id": "hx-flood-after",
+    "title": "After a flood",
+    "category": "DISASTER_PREP",
+    "summary": "Assume flood water is contaminated with sewage, chemicals and debris.",
+    "contentMarkdown": "# After a flood\n\n* Assume flood water is contaminated with sewage, chemicals and debris.\n* Avoid contact; wash with soap and clean water if you touch it, and keep wounds covered.\n* Do not drink tap water until authorities say it is safe; boil or disinfect it.\n* Throw away food that touched flood water.\n* Do not enter buildings with standing water if the electricity may still be on.\n* Watch for snakes and animals that may have moved into homes.\n* Wear gloves and boots while cleaning, and dry or remove wet materials within 24 to 48 hours to limit mold.",
+    "steps": [
+      "Avoid contact; wash with soap and clean water if you touch it, and keep wounds covered.",
+      "Do not drink tap water until authorities say it is safe; boil or disinfect it.",
+      "Throw away food that touched flood water.",
+      "Do not enter buildings with standing water if the electricity may still be on.",
+      "Watch for snakes and animals that may have moved into homes.",
+      "Wear gloves and boots while cleaning, and dry or remove wet materials within 24 to 48 hours to limit mold."
+    ],
+    "tags": [
+      "after",
+      "flood",
+      "floodwater",
+      "contaminated",
+      "return",
+      "home",
+      "mold",
+      "clean",
+      "disease"
+    ],
+    "sourceManual": "CDC / FEMA flood recovery guidance"
+  },
+  {
+    "id": "hx-cyclone",
+    "title": "Cyclone, hurricane and storm safety",
+    "category": "DISASTER_PREP",
+    "summary": "Before a cyclone: secure or bring inside loose objects, charge phones and power banks, store drinking water, and follow evacuation orders, especially in coastal or low-lying areas exposed to storm surge.",
+    "contentMarkdown": "# Cyclone, hurricane and storm safety\n\n* Before a cyclone: secure or bring inside loose objects, charge phones and power banks, store drinking water, and follow evacuation orders, especially in coastal or low-lying areas exposed to storm surge.\n* During the storm, stay indoors in the strongest part of the building, away from windows; a small interior room or hallway on the lowest floor that will not flood is best.\n* If the wind suddenly stops, you may be in the eye of the storm; stay inside because winds will return from the opposite direction.\n* After the storm, avoid fallen power lines, damaged buildings and flood water.",
+    "steps": [
+      "During the storm, stay indoors in the strongest part of the building, away from windows; a small interior room or hallway on the lowest floor that will not flood is best.",
+      "If the wind suddenly stops, you may be in the eye of the storm; stay inside because winds will return from the opposite direction.",
+      "After the storm, avoid fallen power lines, damaged buildings and flood water."
+    ],
+    "tags": [
+      "cyclone",
+      "hurricane",
+      "typhoon",
+      "storm",
+      "wind",
+      "strong",
+      "winds",
+      "shelter",
+      "eye"
+    ],
+    "sourceManual": "IMD / NOAA cyclone and hurricane guidance"
+  },
+  {
+    "id": "hx-lightning",
+    "title": "Lightning safety",
+    "category": "DISASTER_PREP",
+    "summary": "When thunder roars, go indoors.",
+    "contentMarkdown": "# Lightning safety\n\n* When thunder roars, go indoors.\n* If you can hear thunder, you are close enough to be struck.\n* Shelter in a building with plumbing and wiring, or a hard-topped metal vehicle with windows closed.\n* Avoid open fields, hilltops, isolated tall trees, water and metal fences.\n* There is no safe place outdoors, but if caught out, avoid the highest point and keep moving toward shelter.\n* Wait 30 minutes after the last thunder before going outside.\n* People struck by lightning do not carry an electric charge and can be touched safely; check breathing and start CPR if needed.",
+    "steps": [
+      "If you can hear thunder, you are close enough to be struck.",
+      "Shelter in a building with plumbing and wiring, or a hard-topped metal vehicle with windows closed.",
+      "Avoid open fields, hilltops, isolated tall trees, water and metal fences.",
+      "There is no safe place outdoors, but if caught out, avoid the highest point and keep moving toward shelter.",
+      "Wait 30 minutes after the last thunder before going outside.",
+      "People struck by lightning do not carry an electric charge and can be touched safely; check breathing and start CPR if needed."
+    ],
+    "tags": [
+      "lightning",
+      "thunder",
+      "thunderstorm",
+      "struck",
+      "outdoors",
+      "shelter"
+    ],
+    "sourceManual": "US National Weather Service lightning guidance"
+  },
+  {
+    "id": "hx-fire-building",
+    "title": "Escaping a building fire",
+    "category": "SHELTER_FIRE",
+    "summary": "Get out, stay out, and call for help.",
+    "contentMarkdown": "# Escaping a building fire\n\n* Get out, stay out, and call for help.\n* Crawl low under smoke, where the air is cleaner.\n* Before opening a door, feel it with the back of your hand; if it is hot, do not open it and use another way out.\n* Close doors behind you to slow the fire.\n* Never use elevators.\n* If you cannot escape, close the door, seal gaps with wet cloth, open a window and signal with a bright cloth or torch.\n* If your clothes catch fire: stop, drop to the ground, cover your face and roll until the flames are out.\n* Never go back inside a burning building.",
+    "steps": [
+      "Crawl low under smoke, where the air is cleaner.",
+      "Before opening a door, feel it with the back of your hand; if it is hot, do not open it and use another way out.",
+      "Close doors behind you to slow the fire.",
+      "Never use elevators.",
+      "If you cannot escape, close the door, seal gaps with wet cloth, open a window and signal with a bright cloth or torch.",
+      "If your clothes catch fire: stop, drop to the ground, cover your face and roll until the flames are out.",
+      "Never go back inside a burning building."
+    ],
+    "tags": [
+      "fire",
+      "smoke",
+      "building",
+      "house",
+      "burning",
+      "escape",
+      "door",
+      "evacuate",
+      "flames"
+    ],
+    "sourceManual": "Fire service escape guidance"
+  },
+  {
+    "id": "hx-wildfire",
+    "title": "Wildfire and forest fire",
+    "category": "SHELTER_FIRE",
+    "summary": "Leave early when told to evacuate; do not wait to see the flames.",
+    "contentMarkdown": "# Wildfire and forest fire\n\n* Leave early when told to evacuate; do not wait to see the flames.\n* Wear long cotton or wool clothing, sturdy shoes, and a mask (N95 if available) against smoke.\n* If trapped in a vehicle, park away from vegetation, close windows and vents, lie on the floor and cover yourself with a blanket.\n* If trapped on foot, find an area with little fuel such as a road, rocky area or body of water, lie face down and cover your body.\n* Smoke can cause breathing problems; people with asthma or heart disease should move away from smoke early.",
+    "steps": [
+      "Wear long cotton or wool clothing, sturdy shoes, and a mask (N95 if available) against smoke.",
+      "If trapped in a vehicle, park away from vegetation, close windows and vents, lie on the floor and cover yourself with a blanket.",
+      "If trapped on foot, find an area with little fuel such as a road, rocky area or body of water, lie face down and cover your body.",
+      "Smoke can cause breathing problems; people with asthma or heart disease should move away from smoke early."
+    ],
+    "tags": [
+      "wildfire",
+      "forest",
+      "fire",
+      "bushfire",
+      "smoke",
+      "evacuate",
+      "embers"
+    ],
+    "sourceManual": "Wildfire evacuation guidance"
+  },
+  {
+    "id": "hx-landslide",
+    "title": "Landslides and mudslides",
+    "category": "DISASTER_PREP",
+    "summary": "Warning signs include new cracks in the ground or walls, tilting trees or poles, sudden changes in stream water from clear to muddy, and a rumbling sound that grows louder.",
+    "contentMarkdown": "# Landslides and mudslides\n\n* Warning signs include new cracks in the ground or walls, tilting trees or poles, sudden changes in stream water from clear to muddy, and a rumbling sound that grows louder.\n* During heavy rain in hilly areas, stay alert and avoid sleeping in rooms facing the slope.\n* If a landslide is happening, move quickly away from its path, to the side rather than downhill.\n* If escape is impossible, curl into a tight ball and protect your head.\n* After a landslide, stay away from the slide area because more slides may follow, and watch for flooding.",
+    "steps": [
+      "During heavy rain in hilly areas, stay alert and avoid sleeping in rooms facing the slope.",
+      "If a landslide is happening, move quickly away from its path, to the side rather than downhill.",
+      "If escape is impossible, curl into a tight ball and protect your head.",
+      "After a landslide, stay away from the slide area because more slides may follow, and watch for flooding."
+    ],
+    "tags": [
+      "landslide",
+      "mudslide",
+      "debris",
+      "flow",
+      "slope",
+      "hill",
+      "mountain",
+      "rain",
+      "rumbling"
+    ],
+    "sourceManual": "USGS / FEMA landslide guidance"
+  },
+  {
+    "id": "hx-heat-stroke",
+    "title": "Heat stroke and heat exhaustion",
+    "category": "FIRST_AID",
+    "summary": "Heat stroke is life-threatening.",
+    "contentMarkdown": "# Heat stroke and heat exhaustion\n\n* Heat stroke is life-threatening.\n* Signs: very high body temperature, confusion, slurred speech, hot skin (dry or sweating), fainting or seizures.\n* Call for help, move the person to shade, and cool them fast: pour or spray cool water over the body, fan them, and place cold packs or wet cloths on the neck, armpits and groin.\n* Do not give fluids if they are confused or cannot swallow.\n* Heat exhaustion (heavy sweating, weakness, headache, nausea, cramps) is less severe: rest in shade, loosen clothing, sip water or oral rehydration solution.\n* Prevent heat illness by drinking water regularly and avoiding activity in the hottest hours.",
+    "steps": [
+      "Signs: very high body temperature, confusion, slurred speech, hot skin (dry or sweating), fainting or seizures.",
+      "Call for help, move the person to shade, and cool them fast: pour or spray cool water over the body, fan them, and place cold packs or wet cloths on the neck, armpits and groin.",
+      "Do not give fluids if they are confused or cannot swallow.",
+      "Heat exhaustion (heavy sweating, weakness, headache, nausea, cramps) is less severe: rest in shade, loosen clothing, sip water or oral rehydration solution.",
+      "Prevent heat illness by drinking water regularly and avoiding activity in the hottest hours."
+    ],
+    "tags": [
+      "heat",
+      "stroke",
+      "heatstroke",
+      "heat",
+      "exhaustion",
+      "hot",
+      "sun",
+      "temperature",
+      "heatwave",
+      "collapse",
+      "sweating"
+    ],
+    "sourceManual": "WHO / Red Cross heat illness guidance"
+  },
+  {
+    "id": "hx-cpr-child",
+    "title": "CPR for children and babies",
+    "category": "TRAUMA_CPR",
+    "summary": "For a child who is unresponsive and not breathing normally, give 5 rescue breaths first if trained, then 30 chest compressions with one or two hands, about one third of the chest depth (around 5 cm), at 100 to 120 per minute, then 2 breaths, and repeat.",
+    "contentMarkdown": "# CPR for children and babies\n\n* For a child who is unresponsive and not breathing normally, give 5 rescue breaths first if trained, then 30 chest compressions with one or two hands, about one third of the chest depth (around 5 cm), at 100 to 120 per minute, then 2 breaths, and repeat.\n* For a baby under one year, cover the mouth and nose with your mouth for breaths and use two fingers in the centre of the chest for compressions, about 4 cm deep.\n* If alone with no phone, do CPR for one minute before going for help.",
+    "steps": [
+      "For a baby under one year, cover the mouth and nose with your mouth for breaths and use two fingers in the centre of the chest for compressions, about 4 cm deep.",
+      "If alone with no phone, do CPR for one minute before going for help."
+    ],
+    "tags": [
+      "cpr",
+      "child",
+      "baby",
+      "infant",
+      "kid",
+      "not",
+      "breathing",
+      "unresponsive"
+    ],
+    "sourceManual": "Red Cross / resuscitation council guidance"
+  },
+  {
+    "id": "hx-recovery-position",
+    "title": "Recovery position",
+    "category": "TRAUMA_CPR",
+    "summary": "If someone is unconscious but breathing normally and you do not suspect a spinal injury, place them in the recovery position so their airway stays open and fluids can drain.",
+    "contentMarkdown": "# Recovery position\n\n* If someone is unconscious but breathing normally and you do not suspect a spinal injury, place them in the recovery position so their airway stays open and fluids can drain.\n* Kneel beside them, place the arm nearest you at a right angle, bring the far arm across the chest with the back of the hand against their near cheek, bend the far knee up, and roll them toward you onto their side.\n* Tilt the head back slightly to keep the airway open.\n* Keep checking their breathing; if it stops, start CPR.",
+    "steps": [
+      "Kneel beside them, place the arm nearest you at a right angle, bring the far arm across the chest with the back of the hand against their near cheek, bend the far knee up, and roll them toward you onto their side.",
+      "Tilt the head back slightly to keep the airway open.",
+      "Keep checking their breathing; if it stops, start CPR."
+    ],
+    "tags": [
+      "recovery",
+      "position",
+      "unconscious",
+      "breathing",
+      "passed",
+      "out",
+      "fainted",
+      "vomiting"
+    ],
+    "sourceManual": "Red Cross first aid guidance"
+  },
+  {
+    "id": "hx-shock",
+    "title": "Shock",
+    "category": "TRAUMA_CPR",
+    "summary": "Shock is a life-threatening drop in blood flow, often after heavy bleeding, burns or serious injury.",
+    "contentMarkdown": "# Shock\n\n* Shock is a life-threatening drop in blood flow, often after heavy bleeding, burns or serious injury.\n* Signs: pale, cold, clammy skin, fast weak pulse, fast breathing, confusion, thirst.\n* Treat the cause, such as stopping bleeding.\n* Lay the person down and, if there is no leg, hip or spine injury, raise their legs slightly.\n* Keep them warm with a blanket, loosen tight clothing, and reassure them.\n* Do not give food or drink.\n* Monitor breathing and be ready to give CPR.",
+    "steps": [
+      "Signs: pale, cold, clammy skin, fast weak pulse, fast breathing, confusion, thirst.",
+      "Treat the cause, such as stopping bleeding.",
+      "Lay the person down and, if there is no leg, hip or spine injury, raise their legs slightly.",
+      "Keep them warm with a blanket, loosen tight clothing, and reassure them.",
+      "Do not give food or drink.",
+      "Monitor breathing and be ready to give CPR."
+    ],
+    "tags": [
+      "shock",
+      "pale",
+      "cold",
+      "clammy",
+      "weak",
+      "pulse",
+      "blood",
+      "loss",
+      "dizzy"
+    ],
+    "sourceManual": "Red Cross first aid guidance"
+  },
+  {
+    "id": "hx-chemical-burn",
+    "title": "Chemical burns and chemicals in the eye",
+    "category": "FIRST_AID",
+    "summary": "Protect yourself with gloves if possible.",
+    "contentMarkdown": "# Chemical burns and chemicals in the eye\n\n* Protect yourself with gloves if possible.\n* Brush off any dry powder chemical, then rinse the skin with plenty of running water for at least 20 minutes and remove contaminated clothing.\n* For chemicals in the eye, hold the eye open and rinse with gently running clean water for at least 20 minutes, with the injured eye lower so water runs away from the other eye.\n* Do not rub the eye.\n* Seek medical help and note the name of the chemical if known.",
+    "steps": [
+      "Brush off any dry powder chemical, then rinse the skin with plenty of running water for at least 20 minutes and remove contaminated clothing.",
+      "For chemicals in the eye, hold the eye open and rinse with gently running clean water for at least 20 minutes, with the injured eye lower so water runs away from the other eye.",
+      "Do not rub the eye.",
+      "Seek medical help and note the name of the chemical if known."
+    ],
+    "tags": [
+      "chemical",
+      "burn",
+      "acid",
+      "eye",
+      "splash",
+      "bleach",
+      "alkali"
+    ],
+    "sourceManual": "Red Cross first aid guidance"
+  },
+  {
+    "id": "hx-fracture",
+    "title": "Broken bones and sprains",
+    "category": "TRAUMA_CPR",
+    "summary": "Do not try to straighten a broken bone.",
+    "contentMarkdown": "# Broken bones and sprains\n\n* Do not try to straighten a broken bone.\n* Support the injured part in the position you found it and keep it still.\n* Immobilise it with a splint made from a rolled newspaper, board or stick, padded with cloth and tied above and below the injury, not over it.\n* For an arm, a sling made from a triangular cloth helps.\n* For an open fracture with bone through the skin, cover the wound with a clean dressing and control bleeding without pressing on the bone.\n* Apply a cold pack wrapped in cloth to reduce swelling and watch for signs of shock.",
+    "steps": [
+      "Support the injured part in the position you found it and keep it still.",
+      "Immobilise it with a splint made from a rolled newspaper, board or stick, padded with cloth and tied above and below the injury, not over it.",
+      "For an arm, a sling made from a triangular cloth helps.",
+      "For an open fracture with bone through the skin, cover the wound with a clean dressing and control bleeding without pressing on the bone.",
+      "Apply a cold pack wrapped in cloth to reduce swelling and watch for signs of shock."
+    ],
+    "tags": [
+      "fracture",
+      "broken",
+      "bone",
+      "arm",
+      "leg",
+      "sprain",
+      "splint",
+      "swelling"
+    ],
+    "sourceManual": "Red Cross first aid guidance"
+  },
+  {
+    "id": "hx-spinal-head-injury",
+    "title": "Head, neck and spine injuries",
+    "category": "TRAUMA_CPR",
+    "summary": "If someone may have a neck or spine injury (after a fall, collapse or crush), do not move them unless they are in danger or you need to give CPR.",
+    "contentMarkdown": "# Head, neck and spine injuries\n\n* If someone may have a neck or spine injury (after a fall, collapse or crush), do not move them unless they are in danger or you need to give CPR.\n* Keep their head and neck still by holding it in line with the body.\n* For head injuries, watch for danger signs: unconsciousness, confusion, repeated vomiting, severe headache, seizure, unequal pupils, or clear fluid from the nose or ears; these need urgent medical care.\n* Control scalp bleeding with gentle pressure.\n* Someone with a head injury should not be left alone for the next 24 hours.",
+    "steps": [
+      "Keep their head and neck still by holding it in line with the body.",
+      "For head injuries, watch for danger signs: unconsciousness, confusion, repeated vomiting, severe headache, seizure, unequal pupils, or clear fluid from the nose or ears; these need urgent medical care.",
+      "Control scalp bleeding with gentle pressure.",
+      "Someone with a head injury should not be left alone for the next 24 hours."
+    ],
+    "tags": [
+      "head",
+      "injury",
+      "neck",
+      "spine",
+      "spinal",
+      "back",
+      "fall",
+      "concussion",
+      "unconscious"
+    ],
+    "sourceManual": "Red Cross first aid guidance"
+  },
+  {
+    "id": "hx-snake-bite",
+    "title": "Snake bite",
+    "category": "FIRST_AID",
+    "summary": "Move away from the snake.",
+    "contentMarkdown": "# Snake bite\n\n* Move away from the snake.\n* Keep the person calm and as still as possible, because movement spreads venom.\n* Remove rings, watches and tight clothing near the bite before swelling starts.\n* Immobilise the bitten limb with a splint and keep it at about heart level.\n* Get to a hospital as fast as possible; antivenom is the only effective treatment.\n* Do not cut the wound, suck out venom, apply ice, tie a tight tourniquet, or use herbal remedies.\n* Note the time of the bite and, if safe, a photo or description of the snake; do not try to catch it.",
+    "steps": [
+      "Keep the person calm and as still as possible, because movement spreads venom.",
+      "Remove rings, watches and tight clothing near the bite before swelling starts.",
+      "Immobilise the bitten limb with a splint and keep it at about heart level.",
+      "Get to a hospital as fast as possible; antivenom is the only effective treatment.",
+      "Do not cut the wound, suck out venom, apply ice, tie a tight tourniquet, or use herbal remedies.",
+      "Note the time of the bite and, if safe, a photo or description of the snake; do not try to catch it."
+    ],
+    "tags": [
+      "snake",
+      "bite",
+      "snakebite",
+      "venom",
+      "cobra",
+      "viper",
+      "bitten"
+    ],
+    "sourceManual": "WHO snakebite guidance"
+  },
+  {
+    "id": "hx-animal-bite",
+    "title": "Dog and animal bites (rabies risk)",
+    "category": "FIRST_AID",
+    "summary": "Wash the wound immediately and thoroughly with soap and running water for about 15 minutes.",
+    "contentMarkdown": "# Dog and animal bites (rabies risk)\n\n* Wash the wound immediately and thoroughly with soap and running water for about 15 minutes.\n* This greatly reduces the risk of rabies.\n* Then apply an antiseptic such as povidone-iodine or alcohol if available, and cover loosely.\n* Control bleeding with pressure.\n* Seek medical care as soon as possible for rabies vaccination, especially for bites from dogs, bats, monkeys or wild animals, even if the wound looks small.\n* Rabies is almost always fatal once symptoms appear, but is preventable with timely vaccination.",
+    "steps": [
+      "This greatly reduces the risk of rabies.",
+      "Then apply an antiseptic such as povidone-iodine or alcohol if available, and cover loosely.",
+      "Control bleeding with pressure.",
+      "Seek medical care as soon as possible for rabies vaccination, especially for bites from dogs, bats, monkeys or wild animals, even if the wound looks small.",
+      "Rabies is almost always fatal once symptoms appear, but is preventable with timely vaccination."
+    ],
+    "tags": [
+      "dog",
+      "bite",
+      "animal",
+      "bite",
+      "rabies",
+      "monkey",
+      "bat",
+      "scratch"
+    ],
+    "sourceManual": "WHO rabies guidance"
+  },
+  {
+    "id": "hx-drowning",
+    "title": "Drowning rescue",
+    "category": "TRAUMA_CPR",
+    "summary": "Do not jump in unless trained; reach with a stick, rope or clothing, or throw something that floats.",
+    "contentMarkdown": "# Drowning rescue\n\n* Do not jump in unless trained; reach with a stick, rope or clothing, or throw something that floats.\n* Once the person is out of the water, check breathing.\n* If they are not breathing normally, give 5 rescue breaths first, then start CPR with 30 compressions and 2 breaths.\n* If they are breathing, place them in the recovery position, keep them warm and watch them.\n* Anyone who nearly drowned should get medical attention, because breathing problems can develop hours later.",
+    "steps": [
+      "Once the person is out of the water, check breathing.",
+      "If they are not breathing normally, give 5 rescue breaths first, then start CPR with 30 compressions and 2 breaths.",
+      "If they are breathing, place them in the recovery position, keep them warm and watch them.",
+      "Anyone who nearly drowned should get medical attention, because breathing problems can develop hours later."
+    ],
+    "tags": [
+      "drowning",
+      "drown",
+      "water",
+      "swimming",
+      "rescue",
+      "pulled",
+      "from",
+      "water"
+    ],
+    "sourceManual": "Red Cross water safety guidance"
+  },
+  {
+    "id": "hx-electric-shock",
+    "title": "Electric shock",
+    "category": "FIRST_AID",
+    "summary": "Do not touch the person while they are still in contact with the electrical source.",
+    "contentMarkdown": "# Electric shock\n\n* Do not touch the person while they are still in contact with the electrical source.\n* Switch off the power at the mains if you can.\n* If not, stand on dry insulating material such as wood or rubber and push the source away with a dry wooden object.\n* Stay at least 18 metres away from fallen high-voltage power lines and wait for the power company.\n* Once safe, check breathing and start CPR if needed.\n* Cool any burns with water and cover them.\n* All electric shock victims should be checked by a doctor.",
+    "steps": [
+      "Switch off the power at the mains if you can.",
+      "If not, stand on dry insulating material such as wood or rubber and push the source away with a dry wooden object.",
+      "Stay at least 18 metres away from fallen high-voltage power lines and wait for the power company.",
+      "Once safe, check breathing and start CPR if needed.",
+      "Cool any burns with water and cover them.",
+      "All electric shock victims should be checked by a doctor."
+    ],
+    "tags": [
+      "electric",
+      "shock",
+      "electrocution",
+      "electricity",
+      "power",
+      "line",
+      "current",
+      "wire"
+    ],
+    "sourceManual": "Red Cross first aid guidance"
+  },
+  {
+    "id": "hx-seizure",
+    "title": "Seizures",
+    "category": "FIRST_AID",
+    "summary": "Stay calm and time the seizure.",
+    "contentMarkdown": "# Seizures\n\n* Stay calm and time the seizure.\n* Move hard or sharp objects away and cushion the head with something soft.\n* Do not hold the person down and never put anything in their mouth.\n* Loosen tight clothing around the neck.\n* When the jerking stops, roll them into the recovery position and stay with them until they are fully awake.\n* Get urgent help if the seizure lasts more than 5 minutes, another seizure follows, the person is injured, pregnant, in water, or does not wake up.",
+    "steps": [
+      "Move hard or sharp objects away and cushion the head with something soft.",
+      "Do not hold the person down and never put anything in their mouth.",
+      "Loosen tight clothing around the neck.",
+      "When the jerking stops, roll them into the recovery position and stay with them until they are fully awake.",
+      "Get urgent help if the seizure lasts more than 5 minutes, another seizure follows, the person is injured, pregnant, in water, or does not wake up."
+    ],
+    "tags": [
+      "seizure",
+      "fit",
+      "convulsion",
+      "epilepsy",
+      "shaking",
+      "jerking"
+    ],
+    "sourceManual": "Epilepsy foundation / Red Cross guidance"
+  },
+  {
+    "id": "hx-dehydration-ors",
+    "title": "Dehydration, diarrhoea and homemade ORS",
+    "category": "FIRST_AID",
+    "summary": "Diarrhoea and vomiting can quickly cause dangerous dehydration, especially in children and older people.",
+    "contentMarkdown": "# Dehydration, diarrhoea and homemade ORS\n\n* Diarrhoea and vomiting can quickly cause dangerous dehydration, especially in children and older people.\n* Give oral rehydration solution (ORS) in small, frequent sips.\n* If ORS packets are not available, make it at home: mix 6 level teaspoons of sugar and half a level teaspoon of salt in 1 litre of clean, boiled and cooled water, and stir until dissolved.\n* Keep breastfeeding babies.\n* Signs of severe dehydration: very little or no urine, sunken eyes, extreme thirst or inability to drink, lethargy; these need urgent medical care.\n* Wash hands with soap after using the toilet and before handling food.",
+    "steps": [
+      "Give oral rehydration solution (ORS) in small, frequent sips.",
+      "If ORS packets are not available, make it at home: mix 6 level teaspoons of sugar and half a level teaspoon of salt in 1 litre of clean, boiled and cooled water, and stir until dissolved.",
+      "Keep breastfeeding babies.",
+      "Signs of severe dehydration: very little or no urine, sunken eyes, extreme thirst or inability to drink, lethargy; these need urgent medical care.",
+      "Wash hands with soap after using the toilet and before handling food."
+    ],
+    "tags": [
+      "dehydration",
+      "diarrhea",
+      "diarrhoea",
+      "ors",
+      "oral",
+      "rehydration",
+      "salt",
+      "sugar",
+      "vomiting",
+      "cholera"
+    ],
+    "sourceManual": "WHO / UNICEF oral rehydration guidance"
+  },
+  {
+    "id": "hx-water-storage",
+    "title": "How much water and food to store",
+    "category": "DISASTER_PREP",
+    "summary": "Store at least 4 litres (about 1 gallon) of water per person per day: around 2 litres for drinking and the rest for food and hygiene.",
+    "contentMarkdown": "# How much water and food to store\n\n* Store at least 4 litres (about 1 gallon) of water per person per day: around 2 litres for drinking and the rest for food and hygiene.\n* Plan for at least 3 days, ideally 2 weeks.\n* Children, nursing mothers, sick people and hot climates need more.\n* Do not ration drinking water if supplies are low; drink what you need today and look for more tomorrow.\n* Store food that needs no refrigeration or cooking, such as canned goods, dry snacks, biscuits and dried fruit, and keep a manual can opener.",
+    "steps": [
+      "Plan for at least 3 days, ideally 2 weeks.",
+      "Children, nursing mothers, sick people and hot climates need more.",
+      "Do not ration drinking water if supplies are low; drink what you need today and look for more tomorrow.",
+      "Store food that needs no refrigeration or cooking, such as canned goods, dry snacks, biscuits and dried fruit, and keep a manual can opener."
+    ],
+    "tags": [
+      "how",
+      "much",
+      "water",
+      "per",
+      "person",
+      "store",
+      "supply",
+      "days",
+      "ration",
+      "emergency",
+      "kit"
+    ],
+    "sourceManual": "FEMA / Red Cross preparedness guidance"
+  },
+  {
+    "id": "hx-food-safety",
+    "title": "Food safety during power outages",
+    "category": "WATER_SANITATION",
+    "summary": "Keep fridge and freezer doors closed.",
+    "contentMarkdown": "# Food safety during power outages\n\n* Keep fridge and freezer doors closed.\n* A closed fridge keeps food cold for about 4 hours.\n* A full closed freezer keeps food frozen for about 48 hours (24 hours if half full).\n* Throw away perishable food like meat, fish, eggs, milk and leftovers that has been above 4 degrees C (40 F) for more than 2 hours.\n* Never taste food to check if it is safe.\n* When in doubt, throw it out.\n* Throw away any food that touched flood water, including canned food with damaged cans.",
+    "steps": [
+      "A closed fridge keeps food cold for about 4 hours.",
+      "A full closed freezer keeps food frozen for about 48 hours (24 hours if half full).",
+      "Throw away perishable food like meat, fish, eggs, milk and leftovers that has been above 4 degrees C (40 F) for more than 2 hours.",
+      "Never taste food to check if it is safe.",
+      "When in doubt, throw it out.",
+      "Throw away any food that touched flood water, including canned food with damaged cans."
+    ],
+    "tags": [
+      "food",
+      "spoiled",
+      "power",
+      "outage",
+      "fridge",
+      "refrigerator",
+      "freezer",
+      "safe",
+      "eat"
+    ],
+    "sourceManual": "USDA / CDC food safety guidance"
+  },
+  {
+    "id": "hx-carbon-monoxide",
+    "title": "Generators, stoves and carbon monoxide",
+    "category": "SHELTER_FIRE",
+    "summary": "Never use a generator, charcoal grill, camp stove or gas heater indoors, in a garage, or near open windows, even with doors open.",
+    "contentMarkdown": "# Generators, stoves and carbon monoxide\n\n* Never use a generator, charcoal grill, camp stove or gas heater indoors, in a garage, or near open windows, even with doors open.\n* Carbon monoxide is invisible, has no smell and can kill within minutes.\n* Keep generators at least 6 metres (20 feet) away from the house.\n* Symptoms of poisoning are headache, dizziness, weakness, nausea, confusion and chest pain; several people feeling sick at the same time is a warning sign.\n* If suspected, get everyone into fresh air immediately and seek medical help.",
+    "steps": [
+      "Carbon monoxide is invisible, has no smell and can kill within minutes.",
+      "Keep generators at least 6 metres (20 feet) away from the house.",
+      "Symptoms of poisoning are headache, dizziness, weakness, nausea, confusion and chest pain; several people feeling sick at the same time is a warning sign.",
+      "If suspected, get everyone into fresh air immediately and seek medical help."
+    ],
+    "tags": [
+      "carbon",
+      "monoxide",
+      "co",
+      "generator",
+      "stove",
+      "charcoal",
+      "gas",
+      "poisoning",
+      "headache",
+      "indoors"
+    ],
+    "sourceManual": "CDC carbon monoxide guidance"
+  },
+  {
+    "id": "hx-gas-leak",
+    "title": "Gas leaks",
+    "category": "SHELTER_FIRE",
+    "summary": "If you smell gas: do not switch any electrical switches on or off, do not use a lighter or matches, and do not use your phone inside.",
+    "contentMarkdown": "# Gas leaks\n\n* If you smell gas: do not switch any electrical switches on or off, do not use a lighter or matches, and do not use your phone inside.\n* Open doors and windows, turn off the gas at the cylinder or meter if it is safe to do so, and get everyone out.\n* Call for help from a safe distance.\n* Do not go back inside until the leak has been fixed and checked.",
+    "steps": [
+      "Open doors and windows, turn off the gas at the cylinder or meter if it is safe to do so, and get everyone out.",
+      "Call for help from a safe distance.",
+      "Do not go back inside until the leak has been fixed and checked."
+    ],
+    "tags": [
+      "gas",
+      "leak",
+      "smell",
+      "lpg",
+      "cylinder",
+      "hissing",
+      "explosion"
+    ],
+    "sourceManual": "Gas safety guidance"
+  },
+  {
+    "id": "hx-emergency-kit",
+    "title": "Emergency go-bag checklist",
+    "category": "DISASTER_PREP",
+    "summary": "Pack a bag you can grab quickly: water (4 litres per person per day), ready-to-eat food, a torch and spare batteries, a power bank and charging cables, a first-aid kit, essential medicines and prescriptions, copies of ID and important documents in a waterproof bag, cash, a whistle, a dust mask, a multi-tool, warm clothes and a rain cover, a blanket, hygiene items and sanitary supplies, and items for babies, older people or pets.",
+    "contentMarkdown": "# Emergency go-bag checklist\n\n* Pack a bag you can grab quickly: water (4 litres per person per day), ready-to-eat food, a torch and spare batteries, a power bank and charging cables, a first-aid kit, essential medicines and prescriptions, copies of ID and important documents in a waterproof bag, cash, a whistle, a dust mask, a multi-tool, warm clothes and a rain cover, a blanket, hygiene items and sanitary supplies, and items for babies, older people or pets.\n* Write down important phone numbers on paper in case your phone dies.",
+    "steps": [
+      "Write down important phone numbers on paper in case your phone dies."
+    ],
+    "tags": [
+      "emergency",
+      "kit",
+      "go",
+      "bag",
+      "checklist",
+      "supplies",
+      "prepare",
+      "pack",
+      "what",
+      "to",
+      "pack"
+    ],
+    "sourceManual": "FEMA / Red Cross preparedness guidance"
+  },
+  {
+    "id": "hx-phone-battery",
+    "title": "Saving phone battery",
+    "category": "DISASTER_PREP",
+    "summary": "Turn on battery saver mode, lower screen brightness, and close apps you do not need.",
+    "contentMarkdown": "# Saving phone battery\n\n* Turn on battery saver mode, lower screen brightness, and close apps you do not need.\n* Turn off mobile data and Wi-Fi scanning when there is no network, since searching for a signal drains the battery quickly; keep Bluetooth on if you rely on the Huzz mesh.\n* Use text messages instead of calls.\n* Keep the phone warm in cold weather.\n* Charge from a car, power bank or solar charger when possible.\n* In this app, the offline assistant automatically switches to low-power text search when the battery is low.",
+    "steps": [
+      "Turn off mobile data and Wi-Fi scanning when there is no network, since searching for a signal drains the battery quickly; keep Bluetooth on if you rely on the Huzz mesh.",
+      "Use text messages instead of calls.",
+      "Keep the phone warm in cold weather.",
+      "Charge from a car, power bank or solar charger when possible.",
+      "In this app, the offline assistant automatically switches to low-power text search when the battery is low."
+    ],
+    "tags": [
+      "phone",
+      "battery",
+      "charge",
+      "power",
+      "save",
+      "low",
+      "battery",
+      "offline"
+    ],
+    "sourceManual": "General preparedness guidance"
+  },
+  {
+    "id": "hx-evacuation",
+    "title": "Evacuation basics",
+    "category": "DISASTER_PREP",
+    "summary": "Leave immediately when authorities order an evacuation.",
+    "contentMarkdown": "# Evacuation basics\n\n* Leave immediately when authorities order an evacuation.\n* Take your go-bag, medicines and documents.\n* Turn off gas, electricity and water if told to and if time allows.\n* Lock your home.\n* Follow recommended routes and avoid shortcuts, which may be blocked or dangerous.\n* Do not drive through flood water or near downed power lines.\n* Let others know where you are going, for example through the Huzz mesh chat.\n* Agree on a family meeting place in case you get separated.",
+    "steps": [
+      "Take your go-bag, medicines and documents.",
+      "Turn off gas, electricity and water if told to and if time allows.",
+      "Lock your home.",
+      "Follow recommended routes and avoid shortcuts, which may be blocked or dangerous.",
+      "Do not drive through flood water or near downed power lines.",
+      "Let others know where you are going, for example through the Huzz mesh chat.",
+      "Agree on a family meeting place in case you get separated."
+    ],
+    "tags": [
+      "evacuate",
+      "evacuation",
+      "leave",
+      "home",
+      "route",
+      "shelter",
+      "order"
+    ],
+    "sourceManual": "FEMA evacuation guidance"
+  },
+  {
+    "id": "hx-panic-calm",
+    "title": "Staying calm and panic attacks",
+    "category": "FIRST_AID",
+    "summary": "Panic attacks are frightening but pass on their own, usually within 10 to 20 minutes.",
+    "contentMarkdown": "# Staying calm and panic attacks\n\n* Panic attacks are frightening but pass on their own, usually within 10 to 20 minutes.\n* Breathe slowly: in through the nose for 4 seconds, hold for a moment, and out through the mouth for 6 seconds.\n* Focus on your senses: name 5 things you can see, 4 you can touch, 3 you can hear.\n* When helping others, stay calm, listen without pressuring them to talk, help with basic needs like water, food and shelter, and connect them with loved ones.\n* Children need routine, reassurance and simple, honest explanations.",
+    "steps": [
+      "Breathe slowly: in through the nose for 4 seconds, hold for a moment, and out through the mouth for 6 seconds.",
+      "Focus on your senses: name 5 things you can see, 4 you can touch, 3 you can hear.",
+      "When helping others, stay calm, listen without pressuring them to talk, help with basic needs like water, food and shelter, and connect them with loved ones.",
+      "Children need routine, reassurance and simple, honest explanations."
+    ],
+    "tags": [
+      "panic",
+      "attack",
+      "anxiety",
+      "calm",
+      "stress",
+      "fear",
+      "breathing",
+      "scared",
+      "trauma"
+    ],
+    "sourceManual": "Psychological first aid guidance (WHO)"
+  },
+  {
+    "id": "hx-childbirth",
+    "title": "Emergency childbirth basics",
+    "category": "FIRST_AID",
+    "summary": "Call for help and try to reach a trained birth attendant.",
+    "contentMarkdown": "# Emergency childbirth basics\n\n* Call for help and try to reach a trained birth attendant.\n* Most births happen naturally; your role is to support.\n* Wash your hands and use clean cloths.\n* Let the mother find a comfortable position.\n* Do not pull the baby; support the head as it comes out.\n* After birth, dry the baby, place it skin-to-skin on the mother's chest and cover both with a blanket.\n* If the baby does not breathe, rub its back firmly.\n* Do not pull on the cord; it can wait until help arrives.\n* Get medical care urgently for heavy bleeding, a baby not breathing, or feet or arm coming first.",
+    "steps": [
+      "Most births happen naturally; your role is to support.",
+      "Wash your hands and use clean cloths.",
+      "Let the mother find a comfortable position.",
+      "Do not pull the baby; support the head as it comes out.",
+      "After birth, dry the baby, place it skin-to-skin on the mother's chest and cover both with a blanket.",
+      "If the baby does not breathe, rub its back firmly.",
+      "Do not pull on the cord; it can wait until help arrives.",
+      "Get medical care urgently for heavy bleeding, a baby not breathing, or feet or arm coming first."
+    ],
+    "tags": [
+      "pregnant",
+      "pregnancy",
+      "labour",
+      "labor",
+      "childbirth",
+      "delivery",
+      "baby",
+      "born"
+    ],
+    "sourceManual": "Red Cross emergency childbirth guidance"
+  },
+  {
+    "id": "hx-sanitation",
+    "title": "Hygiene and sanitation in shelters",
+    "category": "WATER_SANITATION",
+    "summary": "Wash hands with soap and water, or ash if soap is not available, after using the toilet, before eating or cooking, and after caring for sick people.",
+    "contentMarkdown": "# Hygiene and sanitation in shelters\n\n* Wash hands with soap and water, or ash if soap is not available, after using the toilet, before eating or cooking, and after caring for sick people.\n* Use latrines or dig a toilet pit at least 30 metres from water sources and downhill from them; cover waste with soil.\n* Keep drinking water covered and use a clean cup or tap to draw it.\n* Isolate people with diarrhoea or fever where possible and keep their waste away from water.\n* Dispose of garbage away from living areas to reduce flies and rats.",
+    "steps": [
+      "Use latrines or dig a toilet pit at least 30 metres from water sources and downhill from them; cover waste with soil.",
+      "Keep drinking water covered and use a clean cup or tap to draw it.",
+      "Isolate people with diarrhoea or fever where possible and keep their waste away from water.",
+      "Dispose of garbage away from living areas to reduce flies and rats."
+    ],
+    "tags": [
+      "hygiene",
+      "sanitation",
+      "toilet",
+      "latrine",
+      "handwashing",
+      "disease",
+      "shelter",
+      "camp"
+    ],
+    "sourceManual": "WHO WASH emergency guidance"
+  },
+  {
+    "id": "hx-huzz-mesh",
+    "title": "Using the Huzz mesh network",
+    "category": "SIGNALING",
+    "summary": "Huzz lets phones talk without internet using Bluetooth.",
+    "contentMarkdown": "# Using the Huzz mesh network\n\n* Huzz lets phones talk without internet using Bluetooth.\n* Tap Join Mesh Network on the main screen.\n* Messages hop from phone to phone, so more people running Huzz nearby means longer reach.\n* Keep Bluetooth on and the app running in the background.\n* Good uses: share your location and status, ask for medical help, coordinate water and food, and relay messages to people who still have a signal.\n* Keep messages short and clear, for example: Name, location, number of people, injuries, needs.",
+    "steps": [
+      "Tap Join Mesh Network on the main screen.",
+      "Messages hop from phone to phone, so more people running Huzz nearby means longer reach.",
+      "Keep Bluetooth on and the app running in the background.",
+      "Good uses: share your location and status, ask for medical help, coordinate water and food, and relay messages to people who still have a signal.",
+      "Keep messages short and clear, for example: Name, location, number of people, injuries, needs."
+    ],
+    "tags": [
+      "huzz",
+      "mesh",
+      "bluetooth",
+      "chat",
+      "app",
+      "offline",
+      "message",
+      "peers",
+      "range"
+    ],
+    "sourceManual": "Huzz app guide"
+  }
+]

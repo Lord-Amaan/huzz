@@ -57,7 +57,8 @@ class HuzzAiKnowledgeRepository private constructor(private val context: Context
         val assetFiles = listOf(
             "huzzai/first_aid_cpr.json",
             "huzzai/water_sanitation.json",
-            "huzzai/disaster_survival.json"
+            "huzzai/disaster_survival.json",
+            "huzzai/huzz_extended_guide.json"
         )
 
         val listType = object : TypeToken<List<HuzzAiChunk>>() {}.type

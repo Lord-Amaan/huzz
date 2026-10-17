@@ -57,17 +57,27 @@ class HuzzAiModelManager private constructor(private val context: Context) {
     val activeTier: StateFlow<HuzzAiModelTier?> = _activeTier.asStateFlow()
 
     init {
+        deleteRetiredModels()
         // Initialize existing file states
         refreshStates()
         val savedTierId = prefs.getString(KEY_ACTIVE_TIER, null)
         _activeTier.value = HuzzAiModelTier.entries.firstOrNull { it.tierId == savedTierId }
     }
 
+    /** Removes model files from earlier app versions that no tier uses any more (can be 100s of MB). */
+    private fun deleteRetiredModels() {
+        val known = HuzzAiModelTier.entries.flatMap { listOf(it.fileName, "${it.fileName}.tmp") }.toSet()
+        modelsDir.listFiles()?.filter { it.isFile && it.name !in known }?.forEach {
+            Log.i(TAG, "Deleting retired model file ${it.name}")
+            it.delete()
+        }
+    }
+
     fun refreshStates() {
         val states = mutableMapOf<String, ModelDownloadState>()
         for (tier in HuzzAiModelTier.entries) {
             val file = File(modelsDir, tier.fileName)
-            if (file.exists() && file.length() > 0) {
+            if (isComplete(tier, file)) {
                 states[tier.tierId] = ModelDownloadState.Ready(file.absolutePath, file.length())
             } else {
                 states[tier.tierId] = ModelDownloadState.Idle
@@ -76,15 +86,27 @@ class HuzzAiModelManager private constructor(private val context: Context) {
         _downloadStates.value = states
     }
 
-    fun isModelReady(tier: HuzzAiModelTier): Boolean {
-        val file = File(modelsDir, tier.fileName)
-        return file.exists() && file.length() > 0
-    }
+    fun isModelReady(tier: HuzzAiModelTier): Boolean = isComplete(tier, File(modelsDir, tier.fileName))
 
     fun getModelFile(tier: HuzzAiModelTier): File? {
         val file = File(modelsDir, tier.fileName)
-        return if (file.exists() && file.length() > 0) file else null
+        return if (isComplete(tier, file)) file else null
     }
+
+    /** A partially written model file would crash the native loader, so require the exact size. */
+    private fun isComplete(tier: HuzzAiModelTier, file: File) =
+        file.exists() && file.length() == tier.downloadSizeBytes
+
+    /** Total device RAM, used to recommend a tier. */
+    val totalRamMb: Long by lazy {
+        val info = android.app.ActivityManager.MemoryInfo()
+        (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getMemoryInfo(info)
+        info.totalMem / (1024 * 1024)
+    }
+
+    val recommendedTier: HuzzAiModelTier get() = HuzzAiModelTier.recommendedFor(totalRamMb)
+
+    fun freeSpaceBytes(): Long = modelsDir.usableSpace
 
     fun setActiveTier(tier: HuzzAiModelTier?) {
         _activeTier.value = tier
@@ -106,10 +128,26 @@ class HuzzAiModelManager private constructor(private val context: Context) {
             val tempFile = File(modelsDir, "${tier.fileName}.tmp")
 
             try {
-                updateState(tier.tierId, ModelDownloadState.Downloading(0, 0, tier.downloadSizeBytes))
+                // Resume a previous partial download if one exists.
+                val resumeFrom = if (tempFile.exists() && tempFile.length() < tier.downloadSizeBytes) tempFile.length() else 0L
+                if (resumeFrom == 0L) tempFile.delete()
+                updateState(
+                    tier.tierId,
+                    ModelDownloadState.Downloading(
+                        ((resumeFrom * 100) / tier.downloadSizeBytes).toInt(), resumeFrom, tier.downloadSizeBytes
+                    )
+                )
+
+                val needed = tier.downloadSizeBytes - resumeFrom + 100_000_000L
+                if (modelsDir.usableSpace < needed) {
+                    throw IllegalStateException(
+                        "Not enough storage: need ${needed / 1_000_000} MB free, have ${modelsDir.usableSpace / 1_000_000} MB"
+                    )
+                }
 
                 val request = Request.Builder()
                     .url(tier.downloadUrl)
+                    .apply { if (resumeFrom > 0) header("Range", "bytes=$resumeFrom-") }
                     .build()
 
                 httpClient.newCall(request).execute().use { response ->
@@ -117,14 +155,16 @@ class HuzzAiModelManager private constructor(private val context: Context) {
                         throw IllegalStateException("HTTP ${response.code}: ${response.message}")
                     }
 
-                    val body = response.body ?: throw IllegalStateException("Empty response body")
-                    val totalLength = if (body.contentLength() > 0) body.contentLength() else tier.downloadSizeBytes
+                    // 206 = server honoured the Range header; otherwise start over.
+                    val appending = resumeFrom > 0 && response.code == 206
+                    val body = response.body
+                    val totalLength = tier.downloadSizeBytes
 
                     body.byteStream().use { input: InputStream ->
-                        FileOutputStream(tempFile).use { output: FileOutputStream ->
+                        FileOutputStream(tempFile, appending).use { output: FileOutputStream ->
                             val buffer = ByteArray(64 * 1024)
                             var read: Int
-                            var totalRead = 0L
+                            var totalRead = if (appending) resumeFrom else 0L
                             var lastProgressTime = 0L
 
                             while (input.read(buffer).also { read = it } != -1) {
@@ -145,6 +185,12 @@ class HuzzAiModelManager private constructor(private val context: Context) {
                         }
                     }
 
+                    if (tempFile.length() != tier.downloadSizeBytes) {
+                        throw IllegalStateException(
+                            "Download incomplete (${tempFile.length() / 1_000_000} of ${tier.downloadSizeBytes / 1_000_000} MB). Tap download to resume."
+                        )
+                    }
+
                     // Rename temp to target
                     if (tempFile.exists()) {
                         if (targetFile.exists()) targetFile.delete()
@@ -161,11 +207,10 @@ class HuzzAiModelManager private constructor(private val context: Context) {
                 }
             } catch (e: CancellationException) {
                 Log.d(TAG, "Download cancelled for ${tier.tierId}")
-                tempFile.delete()
                 updateState(tier.tierId, ModelDownloadState.Idle)
             } catch (e: Exception) {
+                // Keep the partial file so the next attempt resumes where this one stopped.
                 Log.e(TAG, "Error downloading model ${tier.tierId}", e)
-                tempFile.delete()
                 updateState(tier.tierId, ModelDownloadState.Error(e.localizedMessage ?: "Download failed"))
             } finally {
                 activeDownloadJobs.remove(tier.tierId)

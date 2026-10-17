@@ -36,8 +36,14 @@ data class HuzzAiChunk(
     val sourceManual: String
 ) : Parcelable
 
+/** How a model expects its chat prompt to be formatted. */
+enum class HuzzAiPromptFormat { CHATML, PHI }
+
 /**
- * Specifications for on-demand downloadable on-device Small Language Models.
+ * On-device LLMs run with MediaPipe LLM Inference (.task bundles from the
+ * litert-community Hugging Face org; openly licensed, no login required).
+ * Lite is the default for low-end phones. Without any model, HuzzAi shows
+ * the matched manual's steps instead.
  */
 enum class HuzzAiModelTier(
     val tierId: String,
@@ -47,38 +53,68 @@ enum class HuzzAiModelTier(
     val downloadSizeBytes: Long,
     val ramRequirementMb: Int,
     val downloadUrl: String,
-    val fileName: String
+    val fileName: String,
+    val promptFormat: HuzzAiPromptFormat,
+    /** Character budget for retrieved context; these bundles use a 1280-token KV cache. */
+    val contextChars: Int
 ) {
-    TIER_1_LIGHTWEIGHT(
-        tierId = "smollm2_360m_q4",
-        displayName = "Ultra-Lightweight (SmolLM2)",
-        description = "Optimized for budget devices and emergency low-power states.",
-        parameterSize = "360M Params (4-bit)",
-        downloadSizeBytes = 195_000_000L, // ~195 MB
-        ramRequirementMb = 350,
-        downloadUrl = "https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct-GGUF/resolve/main/smollm2-360m-instruct-q4_k_m.gguf",
-        fileName = "smollm2_360m_q4.bin"
+    // Smaller models (e.g. SmolLM 135M) were tried and produce unusable, looping output.
+    LITE(
+        tierId = "qwen25_05b_q8",
+        displayName = "Lite (Qwen2.5 0.5B)",
+        description = "Default for most phones. Smallest model that follows instructions reliably.",
+        parameterSize = "0.5B Params (8-bit)",
+        downloadSizeBytes = 546_660_344L,
+        ramRequirementMb = 1_200,
+        downloadUrl = "https://huggingface.co/litert-community/Qwen2.5-0.5B-Instruct/resolve/main/Qwen2.5-0.5B-Instruct_multi-prefill-seq_q8_ekv1280.task",
+        fileName = "qwen25_05b_q8.task",
+        promptFormat = HuzzAiPromptFormat.CHATML,
+        contextChars = 1800
     ),
-    TIER_2_BALANCED(
-        tierId = "qwen25_05b_q4",
-        displayName = "Balanced Guidance (Qwen2.5)",
-        description = "Excellent reasoning and step-by-step instruction synthesis for mid-range phones.",
-        parameterSize = "0.5B Params (4-bit)",
-        downloadSizeBytes = 380_000_000L, // ~380 MB
-        ramRequirementMb = 700,
-        downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf",
-        fileName = "qwen25_05b_q4.bin"
+    STANDARD(
+        tierId = "qwen25_15b_q8",
+        displayName = "Standard (Qwen2.5 1.5B)",
+        description = "Clearer, more reliable step-by-step answers for mid-range phones.",
+        parameterSize = "1.5B Params (8-bit)",
+        downloadSizeBytes = 1_597_913_616L,
+        ramRequirementMb = 3_000,
+        downloadUrl = "https://huggingface.co/litert-community/Qwen2.5-1.5B-Instruct/resolve/main/Qwen2.5-1.5B-Instruct_multi-prefill-seq_q8_ekv1280.task",
+        fileName = "qwen25_15b_q8.task",
+        promptFormat = HuzzAiPromptFormat.CHATML,
+        contextChars = 2200
     ),
-    TIER_3_PRECISION(
-        tierId = "gemma2_2b_q4",
-        displayName = "High Precision (Gemma-2)",
-        description = "Deep medical & situational comprehension for flagship hardware.",
-        parameterSize = "2B Params (4-bit)",
-        downloadSizeBytes = 1_150_000_000L, // ~1.15 GB
-        ramRequirementMb = 1800,
-        downloadUrl = "https://huggingface.co/google/gemma-2-2b-it-GGUF/resolve/main/gemma-2-2b-it-Q4_K_M.gguf",
-        fileName = "gemma2_2b_q4.bin"
-    )
+    PRO(
+        tierId = "phi4_mini_q8",
+        displayName = "Pro (Phi-4 mini 3.8B)",
+        description = "Best comprehension for flagship phones with 8 GB+ RAM. Slowest.",
+        parameterSize = "3.8B Params (8-bit)",
+        downloadSizeBytes = 3_944_275_882L,
+        ramRequirementMb = 5_500,
+        downloadUrl = "https://huggingface.co/litert-community/Phi-4-mini-instruct/resolve/main/Phi-4-mini-instruct_multi-prefill-seq_q8_ekv1280.task",
+        fileName = "phi4_mini_q8.task",
+        promptFormat = HuzzAiPromptFormat.PHI,
+        contextChars = 2200
+    );
+
+    /** Text that marks the end of the model's turn; generation is cut there. */
+    val stopMarkers: List<String>
+        get() = when (promptFormat) {
+            HuzzAiPromptFormat.CHATML -> listOf("<|im_end|>", "<|im_start|>", "<|endoftext|>")
+            HuzzAiPromptFormat.PHI -> listOf("<|end|>", "<|user|>", "<|system|>", "<|assistant|>", "<|endoftext|>")
+        }
+
+    fun formatPrompt(system: String, user: String): String = when (promptFormat) {
+        HuzzAiPromptFormat.CHATML ->
+            "<|im_start|>system\n$system<|im_end|>\n<|im_start|>user\n$user<|im_end|>\n<|im_start|>assistant\n"
+        HuzzAiPromptFormat.PHI ->
+            "<|system|>$system<|end|><|user|>$user<|end|><|assistant|>"
+    }
+
+    companion object {
+        /** Largest tier whose RAM need fits comfortably in this device's total RAM. */
+        fun recommendedFor(totalRamMb: Long): HuzzAiModelTier =
+            entries.lastOrNull { it.ramRequirementMb * 2 <= totalRamMb } ?: LITE
+    }
 }
 
 /**

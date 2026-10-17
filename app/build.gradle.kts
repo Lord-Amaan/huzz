@@ -115,6 +115,9 @@ dependencies {
     // WebSocket
     implementation(libs.okhttp)
 
+    // On-device LLM for HuzzAi (MediaPipe LLM Inference)
+    implementation(libs.mediapipe.tasks.genai)
+
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
 

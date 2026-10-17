@@ -8,6 +8,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.example.huzz.huzzai.model.HuzzAiCategory
+import com.example.huzz.huzzai.domain.HuzzAiQueryTerms
 import com.example.huzz.huzzai.model.HuzzAiChunk
 
 /**
@@ -25,7 +26,7 @@ class HuzzAiDatabaseHelper(context: Context) : SQLiteOpenHelper(
     companion object {
         private const val TAG = "HuzzAiDatabaseHelper"
         private const val DATABASE_NAME = "huzzai_knowledge.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 4 // v4: heart attack + stroke manuals
 
         const val TABLE_CHUNKS = "huzzai_chunks"
 
@@ -127,11 +128,14 @@ class HuzzAiDatabaseHelper(context: Context) : SQLiteOpenHelper(
             return getAllByCategory(categoryFilter, limit).map { it to null }
         }
 
-        val all = getAllByCategory(categoryFilter, 100)
-        val terms = sanitizedQuery.trim().lowercase().split("\\s+".toRegex()).filter { it.length >= 2 }
-        if (terms.isEmpty()) {
+        val all = getAllByCategory(categoryFilter, 500)
+        val groups = HuzzAiQueryTerms.groups(sanitizedQuery)
+        if (groups.isEmpty()) {
             return all.take(limit).map { it to null }
         }
+        val minMatched = HuzzAiQueryTerms.minMatched(groups.size)
+        // Match at word starts so "ors" doesn't hit "doors" and "cut" doesn't hit "execute".
+        val patterns = groups.map { group -> group.map { it to Regex("\\b" + Regex.escape(it)) } }
 
         val scored = all.mapNotNull { chunk ->
             var score = 0
@@ -140,22 +144,38 @@ class HuzzAiDatabaseHelper(context: Context) : SQLiteOpenHelper(
             val contentLower = chunk.contentMarkdown.lowercase()
             val tagsLower = chunk.tags.joinToString(" ").lowercase()
             var matchedSnippet: String? = null
+            var matchedGroups = 0
+            var strongHit = false
 
-            for (term in terms) {
-                if (titleLower.contains(term)) score += 10
-                if (tagsLower.contains(term)) score += 7
-                if (summaryLower.contains(term)) {
-                    score += 4
-                    if (matchedSnippet == null) matchedSnippet = extractSnippet(chunk.summary, term)
+            for (group in patterns) {
+                // A query word counts once, scored by its best-matching form (stem or synonym).
+                var best = 0
+                var bestTerm: String? = null
+                for ((term, regex) in group) {
+                    var s = 0
+                    if (regex.containsMatchIn(titleLower)) s += 10
+                    if (regex.containsMatchIn(tagsLower)) s += 7
+                    if (regex.containsMatchIn(summaryLower)) s += 4
+                    if (regex.containsMatchIn(contentLower)) s += 1
+                    if (s > best) { best = s; bestTerm = term }
                 }
-                if (contentLower.contains(term)) {
-                    score += 1
-                    if (matchedSnippet == null) matchedSnippet = extractSnippet(chunk.contentMarkdown, term)
+                val term = bestTerm ?: continue
+                matchedGroups++
+                score += best
+                if (best >= 7) strongHit = true // title or tag match
+                if (matchedSnippet == null) {
+                    matchedSnippet = when {
+                        summaryLower.contains(term) -> extractSnippet(chunk.summary, term)
+                        contentLower.contains(term) -> extractSnippet(chunk.contentMarkdown, term)
+                        else -> null
+                    }
                 }
             }
 
-            if (score > 0) {
-                (chunk to (matchedSnippet ?: chunk.summary)) to score
+            // Require a fair share of the question's words (or a title/tag hit) so one
+            // incidental word isn't returned; manuals matching more of the question rank higher.
+            if (score > 0 && (matchedGroups >= minMatched || strongHit)) {
+                (chunk to (matchedSnippet ?: chunk.summary)) to score * matchedGroups
             } else {
                 null
             }
